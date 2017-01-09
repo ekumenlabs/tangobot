@@ -1,0 +1,58 @@
+/*
+ * Copyright (C) 2014 Juan Ignacio Ubeira.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+repositories {
+
+  maven {
+    url 'https://github.com/rosjava/rosjava_mvn_repo/raw/master'
+  }
+
+  // Local Maven repository inside Catkin Workspace
+  maven {
+    url '../../../devel/share/maven'
+  }
+
+  mavenLocal()
+  mavenCentral()
+}
+
+dependencies {
+  compile fileTree(dir: 'libs', include: ['*.jar'])
+  compile 'org.ros.rosjava_core:rosjava:[0.3.0]'
+  compile 'com.hoho.android.usbserial:usb_seriallib:[0.1, 0.2)'
+}
+
+apply plugin: 'com.android.library'
+
+android {
+  compileSdkVersion 19
+  buildToolsVersion "21.1.2"
+  defaultConfig {
+    minSdkVersion 15
+    targetSdkVersion 19
+    versionCode 1
+    versionName "1.0"
+  }
+
+  lintOptions {
+    abortOnError = false
+  }
+}
+
+android.packagingOptions {
+  exclude 'META-INF/LICENSE.txt'
+  exclude 'META-INF/NOTICE.txt'
+}
