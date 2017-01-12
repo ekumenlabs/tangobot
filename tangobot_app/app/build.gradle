@@ -14,6 +14,23 @@
  * the License.
  */
 
+apply plugin: 'com.android.application'
+
+android {
+  compileSdkVersion 19
+  buildToolsVersion "21.1.2"
+  defaultConfig {
+    minSdkVersion 15
+    targetSdkVersion 19
+    versionCode 1
+    versionName "1.0"
+  }
+
+  lintOptions {
+    abortOnError = false
+  }
+}
+
 repositories {
   maven {
     url 'https://github.com/rosjava/rosjava_mvn_repo/raw/master'
@@ -46,22 +63,7 @@ dependencies {
   compile 'com.hoho.android.usbserial:usb_seriallib:[0.1, 0.2)'
   compile 'com.github.ekumenlabs.base_controller:base_controllerlib:[0.1, 0.2)'
   compile 'org.yaml:snakeyaml:1.17'
-}
 
-apply plugin: 'com.android.application'
-
-android {
-  compileSdkVersion 19
-  buildToolsVersion "21.1.2"
-  defaultConfig {
-    minSdkVersion 15
-    targetSdkVersion 19
-    versionCode 1
-    versionName "1.0"
-  }
-
-  lintOptions {
-    abortOnError = false
-  }
+  compile 'com.github.rosjava.tango_ros_java:tango_ros_node:[0.1,)'
 }
 

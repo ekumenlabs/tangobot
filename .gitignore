@@ -39,4 +39,20 @@
 # Keystore files
 *.jks
 
+# Native built files
+*.o
+*.o.d
+*.so
+*.a
+
+# Native output folders
+*obj/
+*libs/
+
+# Eclipse generated
+*.settings
+*.cproject
+*.project
+
+
 CMakeLists.txt
