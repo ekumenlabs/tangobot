@@ -3,9 +3,9 @@ package com.github.ekumenlabs.tangobot_app.application;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 
-import com.github.ekumenlabs.base_controller.BaseControllerNode;
-import com.github.ekumenlabs.base_controller.BaseOdomPublisher;
-import com.github.ekumenlabs.base_driver.BaseDevice;
+import com.github.c77.base_controller.BaseControllerNode;
+import com.github.c77.base_controller.BaseOdomPublisher;
+import com.github.c77.base_driver.BaseDevice;
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
 
 import org.ros.namespace.GraphName;
