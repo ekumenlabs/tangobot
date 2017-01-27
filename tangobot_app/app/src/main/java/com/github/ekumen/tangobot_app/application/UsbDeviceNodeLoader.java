@@ -1,4 +1,4 @@
-package com.github.ekumenlabs.tangobot_app.application;
+package com.github.ekumen.tangobot_app.application;
 
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;

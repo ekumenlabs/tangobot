@@ -1,4 +1,4 @@
-package com.github.ekumenlabs.tangobot_app.application;
+package com.github.ekumen.tangobot_app.application;
 
 import org.ros.node.NativeNodeMain;
 import org.ros.namespace.GraphName;

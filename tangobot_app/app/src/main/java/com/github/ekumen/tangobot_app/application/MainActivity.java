@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.ekumenlabs.tangobot_app.application;
+package com.github.ekumen.tangobot_app.application;
 
 
 import android.app.PendingIntent;
@@ -29,6 +29,7 @@ import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.github.ekumenlabs.tangobot_app.application.R;
 import com.rosjava.tangoxros.TangoInitializationHelper;
 import com.rosjava.tangoxros.TangoInitializationHelper.DefaultServiceConnection.AfterConnectionCallback;
 import com.rosjava.tangoxros.TangoRosNode;
