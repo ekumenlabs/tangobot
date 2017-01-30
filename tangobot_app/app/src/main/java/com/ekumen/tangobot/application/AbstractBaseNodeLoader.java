@@ -3,9 +3,9 @@ package com.ekumen.tangobot.application;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 
-import com.github.c77.base_controller.BaseControllerNode;
-import com.github.c77.base_controller.BaseOdomPublisher;
-import com.github.c77.base_driver.BaseDevice;
+import com.ekumen.base_controller.BaseControllerNode;
+import com.ekumen.base_controller.BaseOdomPublisher;
+import com.ekumen.base_driver.BaseDevice;
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
 
 import org.ros.namespace.GraphName;
@@ -17,7 +17,7 @@ import java.net.URI;
 
 /**
  * Starts nodes (base controller and odometry publisher) for a robot base which
- * uses the creativa77/base_controller interface
+ * uses the ekumen/base_controller interface
  *
  * @author jcerruti@creativa77.com.ar (Julian Cerruti)
  */
