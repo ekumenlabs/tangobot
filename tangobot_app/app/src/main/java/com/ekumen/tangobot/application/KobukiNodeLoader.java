@@ -1,4 +1,4 @@
-package com.github.ekumen.tangobot_app.application;
+package com.ekumen.tangobot.application;
 
 
 

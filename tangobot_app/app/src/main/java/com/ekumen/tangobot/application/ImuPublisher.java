@@ -27,7 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.github.ekumen.tangobot_app.application;
+package com.ekumen.tangobot.application;
 
 
 import android.hardware.Sensor;

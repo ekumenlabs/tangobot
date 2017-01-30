@@ -27,7 +27,7 @@ apply plugin: 'catkin'
 
 allprojects {
     // A github url provides a good standard unique name for your project
-    group 'com.github.ekumenlabs.tangobot_app'
+    group 'com.ekumen.tangobot'
     version = project.catkin.pkg.version
 }
 
