@@ -47,7 +47,7 @@ dependencies {
   compile 'org.ros.rosjava_messages:geometry_msgs:[0.3,)'
 
   compile 'com.hoho.android.usbserial:UsbSerialLibrary:[0.1, 0.2)'
-  compile 'com.github.creativa77.base_controller:base_controller_lib:[0.1, 0.2)'
+  compile 'com.ekumen.base_controller:base_controller_lib:[0.1, 0.2)'
   compile 'org.yaml:snakeyaml:1.17'
 
   compile 'com.github.rosjava.tango_ros_java:tango_ros_node:[0.1,)'

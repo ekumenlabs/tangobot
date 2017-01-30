@@ -3,8 +3,8 @@ package com.ekumen.tangobot.application;
 
 
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
-import com.github.c77.base_driver.kobuki.KobukiBaseDevice;
-import com.github.c77.base_driver.BaseDevice;
+import com.ekumen.base_driver.kobuki.KobukiBaseDevice;
+import com.ekumen.base_driver.BaseDevice;
 
 import org.ros.node.NodeMainExecutor;
 
