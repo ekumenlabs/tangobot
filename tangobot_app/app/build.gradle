@@ -31,39 +31,24 @@ android {
   }
 }
 
-repositories {
-  maven {
-    url 'https://github.com/rosjava/rosjava_mvn_repo/raw/master'
-  }
-
-  // Local Maven repository inside Catkin Workspace
-  maven {
-    url '../../../devel/share/maven'
-  }
-
-  mavenLocal()
-  mavenCentral()
-}
-
 dependencies {
   compile fileTree(dir: 'libs', include: ['*.jar'])
 
-  compile('org.ros.android_core:android_10:[0.3.0]') {
+  compile('org.ros.android_core:android_10:[0.3, 0.4)') {
     exclude group: 'junit'
     exclude group: 'xml-apis'
     exclude group: 'org.ros.rosjava_core'
   }
 
   // e.g. official msgs
-  compile 'org.ros.rosjava_core:rosjava:[0.3.0]'
+  compile 'org.ros.rosjava_core:rosjava:[0.3, 0.4)'
   compile 'org.ros.rosjava_messages:std_msgs:[0.3,)'
   compile 'org.ros.rosjava_messages:sensor_msgs:[0.3,)'
   compile 'org.ros.rosjava_messages:geometry_msgs:[0.3,)'
 
-  compile 'com.hoho.android.usbserial:usb_seriallib:[0.1, 0.2)'
-  compile 'com.github.ekumenlabs.base_controller:base_controllerlib:[0.1, 0.2)'
+  compile 'com.hoho.android.usbserial:UsbSerialLibrary:[0.1, 0.2)'
+  compile 'com.github.creativa77.base_controller:base_controller_lib:[0.1, 0.2)'
   compile 'org.yaml:snakeyaml:1.17'
 
   compile 'com.github.rosjava.tango_ros_java:tango_ros_node:[0.1,)'
 }
-

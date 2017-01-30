@@ -1,10 +1,10 @@
-package com.github.ekumenlabs.tangobot_app.application;
+package com.ekumen.tangobot.application;
 
 
 
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
-import com.github.ekumenlabs.base_driver.kobuki.KobukiBaseDevice;
-import com.github.ekumenlabs.base_driver.BaseDevice;
+import com.github.c77.base_driver.kobuki.KobukiBaseDevice;
+import com.github.c77.base_driver.BaseDevice;
 
 import org.ros.node.NodeMainExecutor;
 

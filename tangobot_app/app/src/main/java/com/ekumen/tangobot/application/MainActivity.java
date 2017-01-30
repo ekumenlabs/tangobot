@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.ekumenlabs.tangobot_app.application;
+package com.ekumen.tangobot.application;
 
 
 import android.app.PendingIntent;

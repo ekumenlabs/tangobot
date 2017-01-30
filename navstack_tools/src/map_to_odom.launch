@@ -1,0 +1,4 @@
+<!-- This file is used to give an arbitrary reference between map and odom frames, publishing the transform to tf at a low rate -->
+<launch>
+    <node pkg="tf" type="static_transform_publisher" name="map_to_odom" args="5 5 0 0 0 0 map odom 10" />
+</launch>

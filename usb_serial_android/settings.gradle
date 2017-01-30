@@ -18,4 +18,4 @@
 include 'my_android_project'
 include 'my_android_library_project'
 */
-include 'usb_seriallib'
+include 'UsbSerialLibrary'
