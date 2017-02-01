@@ -67,6 +67,7 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
 
     private CountDownLatch mNodeMainExecutorLatch;
     private TangoRosNode mTangoRosNode;
+    private MoveBaseNode mMoveBaseNode;
 
     ServiceConnection mTangoServiceConnection = new TangoInitializationHelper.DefaultServiceConnection(
         new AfterConnectionCallback() {
@@ -138,6 +139,16 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
         }
 
         startTangoRosNode();
+        startMoveBaseNode();
+    }
+
+    private void startMoveBaseNode() {
+        // Create ROS node for base move
+        mLog.info("Starting move base native node");
+        NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
+        nodeConfiguration.setMasterUri(mMasterUri);
+        mMoveBaseNode = new MoveBaseNode();
+        mNodeMainExecutor.execute(mMoveBaseNode, nodeConfiguration);
     }
 
     public void onStart(final ConnectedNode connectedNode) {
