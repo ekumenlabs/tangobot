@@ -52,7 +52,9 @@ MoveBaseNodeExecutor::MoveBaseNodeExecutor() {}
 MoveBaseNodeExecutor::~MoveBaseNodeExecutor() {}
 
 void MoveBaseNodeExecutor::Execute(const char* master_uri, const char* host_ip, const char* node_name) {
-    int result = InitRos(master_uri, host_ip, "move_base_android"); // Todo on rosjava update: use node_name as parameter. In current NativeNodeMain, libname is used
+    // TODO on rosjava update: use node_name as parameter. In current NativeNodeMain, libname is used.
+    // TODO (2): handle error code using new NativeNodeMain's API.
+    int result = InitRos(master_uri, host_ip, "move_base_android");
     if (result == ROS_INIT_ERROR) {
         return;
     }
