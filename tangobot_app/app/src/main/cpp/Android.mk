@@ -3,7 +3,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE    := move_base_jni
-LOCAL_SRC_FILES := src/move_base_jni.cpp
+LOCAL_SRC_FILES := src/move_base_jni.cpp src/move_base_util.cpp
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
 LOCAL_CFLAGS  += --std=c++11 -pthread -fPIC -fexceptions -frtti
 LOCAL_LDLIBS := -landroid -llog

@@ -147,6 +147,7 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
         mLog.info("Starting move base native node");
         NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
         nodeConfiguration.setMasterUri(mMasterUri);
+        nodeConfiguration.setNodeName(MoveBaseNode.NODE_NAME);
         mMoveBaseNode = new MoveBaseNode();
         mNodeMainExecutor.execute(mMoveBaseNode, nodeConfiguration);
     }

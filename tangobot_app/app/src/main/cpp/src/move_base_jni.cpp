@@ -3,21 +3,12 @@
 //
 
 #include "move_base_jni.h"
-
-#include "ros/ros.h"
-#include <move_base/move_base.h>
-#include <android/log.h>
+#include "move_base_util.h"
+#include <string>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-static void log(const char *msg, ...) {
-    va_list args;
-    va_start(args, msg);
-    __android_log_vprint(ANDROID_LOG_INFO, "MOVE_BASE_NDK_EXAMPLE", msg, args);
-    va_end(args);
-}
 
 JNIEXPORT void JNICALL Java_com_ekumen_tangobot_application_MoveBaseNode_execute
     (JNIEnv* env, jobject /*obj*/, jstring master_uri_value, jstring host_ip_value, jstring node_name_value,
@@ -35,40 +26,10 @@ JNIEXPORT void JNICALL Java_com_ekumen_tangobot_application_MoveBaseNode_execute
     env->ReleaseStringUTFChars(host_ip_value, host_ip);
     env->ReleaseStringUTFChars(node_name_value, node_name);
 
-    char* master_copy = strdup(master.c_str());
-    char* host_copy = strdup(host.c_str());
+    move_base_util::MoveBaseNodeExecutor moveBaseNodeExecutor;
+    moveBaseNodeExecutor.Execute(master.c_str(), host.c_str(), node.c_str());
 
-    int argc = 4;
-
-    char *argv[] = {"nothing_important" , master_copy,
-                    host_copy, "cmd_vel:=navigation_velocity_smoother/raw_cmd_vel"};
-
-    for(int i = 0; i < argc; i++){
-        log(argv[i]);
-    }
-
-    ros::init(argc, &argv[0], "move_base_native");
-
-    free(master_copy);
-    free(host_copy);
-
-    if(ros::master::check()){
-        log("ROS MASTER IS UP!");
-    } else {
-        log("NO ROS MASTER.");
-    }
-    log(master.c_str());
-
-    ros::NodeHandle n;
-
-    tf::TransformListener tf(ros::Duration(10));
-    move_base::MoveBase move_base(tf);
-
-    ros::WallRate loop_rate(100);
-    while(ros::ok()) {
-        ros::spinOnce();
-        loop_rate.sleep();
-    }
+    return;
 }
 
 JNIEXPORT void JNICALL Java_com_ekumen_tangobot_application_MoveBaseNode_shutdown
