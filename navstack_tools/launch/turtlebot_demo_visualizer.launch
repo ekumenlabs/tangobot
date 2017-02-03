@@ -15,7 +15,7 @@
   <param name="/use_sim_time" value="false"/>   <!-- False if we are not using simulation-->
 
   <!--  ***************** Robot Model *****************  -->
-  <include file="$(find turtlebot_bringup)/launch/includes/robot.edit.launch.xml">
+  <include file="$(find turtlebot_bringup)/launch/includes/robot.launch.xml">
     <arg name="base" value="$(arg base)" />
     <arg name="stacks" value="$(arg stacks)" />
     <arg name="3d_sensor" value="$(arg 3d_sensor)" />
@@ -30,5 +30,5 @@
   </node>
 
   <!--  **************** Visualisation ****************  -->
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find turtlebot_stage)/rviz/robot_navigation.rviz"/>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find navstack_tools)/launch/robot_navigation.rviz"/>
 </launch>

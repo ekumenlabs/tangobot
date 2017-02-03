@@ -5,7 +5,7 @@ import org.ros.namespace.GraphName;
 import org.ros.node.NativeNodeMain;
 
 public class MoveBaseNode extends NativeNodeMain {
-    public static final String NODE_NAME = "move_base_android";
+    public static final String NODE_NAME = "move_base";
 
     public MoveBaseNode() {
         super("move_base_jni");
