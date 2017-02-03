@@ -147,7 +147,7 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
 
     private void startParameterLoaderNode() {
         // Create node to load configuration to Parameter Server
-        mLog.info("Settings parameters in Parameter Server");
+        mLog.info("Setting parameters in Parameter Server");
         NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
         nodeConfiguration.setMasterUri(mMasterUri);
         nodeConfiguration.setNodeName(ParameterLoaderNode.NODE_NAME);

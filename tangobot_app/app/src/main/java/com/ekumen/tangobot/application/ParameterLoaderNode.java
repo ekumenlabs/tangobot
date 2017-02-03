@@ -66,9 +66,7 @@ public class ParameterLoaderNode extends AbstractNodeMain {
             // if it's not on / for a rosjava master
             // parameterTree.set(GraphName.root(), params);
             // Using an auxiliary function instead
-            Log.i(NODE_NAME, "Starting");
             addParams(parameterTree, params);
-            Log.i(NODE_NAME, "Started");
 
             connectedNode.shutdown();
         }
