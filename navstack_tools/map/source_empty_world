@@ -1,0 +1,1 @@
+export TURTLEBOT_EMPTY_MAP_FILE=$(pwd)/empty.yaml
