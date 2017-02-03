@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-JNIEXPORT void JNICALL Java_com_ekumen_tangobot_application_MoveBaseNode_execute
+JNIEXPORT void JNICALL Java_com_ekumen_tangobot_nodes_MoveBaseNode_execute
     (JNIEnv* env, jobject /*obj*/, jstring master_uri_value, jstring host_ip_value, jstring node_name_value,
         jobjectArray remapping_objects_value)  {
 
@@ -32,7 +32,7 @@ JNIEXPORT void JNICALL Java_com_ekumen_tangobot_application_MoveBaseNode_execute
     return;
 }
 
-JNIEXPORT void JNICALL Java_com_ekumen_tangobot_application_MoveBaseNode_shutdown
+JNIEXPORT void JNICALL Java_com_ekumen_tangobot_nodes_MoveBaseNode_shutdown
         (JNIEnv *, jobject) {
 
 }

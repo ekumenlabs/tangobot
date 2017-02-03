@@ -1,4 +1,4 @@
-package com.ekumen.tangobot.application;
+package com.ekumen.tangobot.loaders;
 
 
 
