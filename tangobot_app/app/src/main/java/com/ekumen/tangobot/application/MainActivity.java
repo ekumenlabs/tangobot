@@ -68,6 +68,8 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
     private CountDownLatch mNodeMainExecutorLatch;
     private TangoRosNode mTangoRosNode;
     private MoveBaseNode mMoveBaseNode;
+    private ParameterLoaderNode mParameterLoaderNode;
+    private int mResourceToLoad = R.raw.kobuki;
 
     ServiceConnection mTangoServiceConnection = new TangoInitializationHelper.DefaultServiceConnection(
         new AfterConnectionCallback() {
@@ -138,8 +140,19 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
             manager.requestPermission(device, mUsbPermissionIntent);
         }
 
+        startParameterLoaderNode();
         startTangoRosNode();
         startMoveBaseNode();
+    }
+
+    private void startParameterLoaderNode() {
+        // Create node to load configuration to Parameter Server
+        mLog.info("Setting parameters in Parameter Server");
+        NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
+        nodeConfiguration.setMasterUri(mMasterUri);
+        nodeConfiguration.setNodeName(ParameterLoaderNode.NODE_NAME);
+        mParameterLoaderNode = new ParameterLoaderNode(getResources().openRawResource(mResourceToLoad));
+        mNodeMainExecutor.execute(mParameterLoaderNode, nodeConfiguration);
     }
 
     private void startMoveBaseNode() {
