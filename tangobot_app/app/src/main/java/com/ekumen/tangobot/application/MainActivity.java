@@ -23,12 +23,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.hardware.SensorManager;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.ekumen.tangobot.loaders.KobukiNodeLoader;
+import com.ekumen.tangobot.loaders.UsbDeviceNodeLoader;
+import com.ekumen.tangobot.nodes.MoveBaseNode;
+import com.ekumen.tangobot.nodes.ParameterLoaderNode;
 import com.rosjava.tangoxros.TangoInitializationHelper;
 import com.rosjava.tangoxros.TangoInitializationHelper.DefaultServiceConnection.AfterConnectionCallback;
 import com.rosjava.tangoxros.TangoRosNode;
@@ -57,7 +60,6 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
     private NodeMainExecutor mNodeMainExecutor = null;
     private URI mMasterUri;
     private String mHostName;
-    private ImuPublisher mImuNode;
     // USB
     private UsbManager mUsbManager;
     private BroadcastReceiver mUsbAttachedReceiver;
@@ -254,22 +256,6 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
         } else {
             mLog.info("USB device unplugged but no corresponding node found");
         }
-    }
-
-    // Create IMU publisher node
-    private void startImu() {
-        mLog.info("Starting imu...");
-
-        NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
-        SensorManager mSensorManager = (SensorManager) this.getSystemService(SENSOR_SERVICE);
-
-        nodeConfiguration.setMasterUri(mMasterUri);
-        nodeConfiguration.setNodeName("ImuNode");
-
-        mImuNode = new ImuPublisher(mSensorManager);
-
-        mLog.info("About to execute ImuNode...");
-        mNodeMainExecutor.execute(mImuNode, nodeConfiguration);
     }
 
     @Override
