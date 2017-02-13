@@ -64,5 +64,5 @@ dependencies {
   compile 'com.ekumen.base_controller:base_controller_lib:[0.1, 0.2)'
   compile 'org.yaml:snakeyaml:[1.17, 1.18)'
 
-  compile 'com.github.rosjava.tango_ros_java:tango_ros_node:[0.1,)'
+  compile 'eu.intermodalics:tango_ros_node:[0.1,)'
 }

@@ -32,15 +32,11 @@ import com.ekumen.tangobot.loaders.KobukiNodeLoader;
 import com.ekumen.tangobot.loaders.UsbDeviceNodeLoader;
 import com.ekumen.tangobot.nodes.MoveBaseNode;
 import com.ekumen.tangobot.nodes.ParameterLoaderNode;
-import com.rosjava.tangoxros.TangoInitializationHelper;
-import com.rosjava.tangoxros.TangoInitializationHelper.DefaultServiceConnection.AfterConnectionCallback;
-import com.rosjava.tangoxros.TangoRosNode;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.android.RosActivity;
 import org.ros.node.ConnectedNode;
-import org.ros.node.NativeNodeMainBeta;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
@@ -53,7 +49,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-import static android.content.ContentValues.TAG;
+import eu.intermodalics.tango_ros_node.TangoInitializationHelper;
+import eu.intermodalics.tango_ros_node.TangoInitializationHelper.DefaultTangoServiceConnection.AfterConnectionCallback;
+import eu.intermodalics.tango_ros_node.TangoRosNode;
 
 public class MainActivity extends RosActivity implements TangoRosNode.CallbackListener {
     private static final String ACTION_USB_PERMISSION = "com.github.rosjava.android.androidp1.USB_PERMISSION";
@@ -82,14 +80,14 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
     };
     private static List<InputStream> mResourcesStreamList = new ArrayList<InputStream>();
 
-    ServiceConnection mTangoServiceConnection = new TangoInitializationHelper.DefaultServiceConnection(
+    ServiceConnection mTangoServiceConnection = new TangoInitializationHelper.DefaultTangoServiceConnection(
         new AfterConnectionCallback() {
             @Override
             public void execute() {
                 if (TangoInitializationHelper.isTangoServiceBound()) {
-                    android.util.Log.i(TAG, "Bound to Tango Service");
+                    mLog.info("Bound to Tango Service");
                 } else {
-                    android.util.Log.e(TAG, getString(R.string.tango_bind_error));
+                    mLog.error(getString(R.string.tango_bind_error));
                     displayToastMessage(R.string.tango_bind_error);
                     onDestroy();
                 }
@@ -288,19 +286,19 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
 
         // Create and start Tango ROS Node
         nodeConfiguration.setNodeName(TangoRosNode.NODE_NAME);
-        if(TangoInitializationHelper.loadTangoSharedLibrary() !=
-                TangoInitializationHelper.ARCH_ERROR) {
+        if (TangoInitializationHelper.loadTangoSharedLibrary() != TangoInitializationHelper.ARCH_ERROR &&
+                TangoInitializationHelper.loadTangoRosNodeSharedLibrary() != TangoInitializationHelper.ARCH_ERROR) {
             mTangoRosNode = new TangoRosNode();
             mTangoRosNode.attachCallbackListener(this);
             TangoInitializationHelper.bindTangoService(this, mTangoServiceConnection);
             if (TangoInitializationHelper.checkTangoVersionOk(this)) {
                 mNodeMainExecutor.execute(mTangoRosNode, nodeConfiguration);
             } else {
-                android.util.Log.e(TAG, getResources().getString(R.string.tango_version_error));
+                mLog.error(getString(R.string.tango_version_error));
                 displayToastMessage(R.string.tango_version_error);
             }
         } else {
-            android.util.Log.e(TAG, getString(R.string.tango_lib_error));
+            mLog.error(getString(R.string.tango_lib_error));
             displayToastMessage(R.string.tango_lib_error);
         }
     }
@@ -317,27 +315,25 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
         });
     }
 
-    /**
-     * Implements TangoRosNode.CallbackListener.
-     */
-    public void onNativeNodeExecutionError(int errorCode) {
-        if (errorCode == NativeNodeMainBeta.ROS_CONNECTION_ERROR) {
-            android.util.Log.e(TAG, getString(R.string.ros_init_error));
-            displayToastMessage(R.string.ros_init_error);
-        } else if (errorCode < NativeNodeMainBeta.SUCCESS) {
-            displayToastMessage(R.string.tango_service_error);
-            android.util.Log.e(TAG, getString(R.string.tango_service_error));
-        }
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (TangoInitializationHelper.isTangoServiceBound()) {
-            android.util.Log.i(TAG, "Unbind tango service");
+            mLog.info("Unbinding tango service");
             unbindService(mTangoServiceConnection);
         }
 
         super.nodeMainExecutorService.forceShutdown();
+    }
+
+    @Override
+    public void onTangoRosErrorHook(int returnCode) {
+        if (returnCode == TangoRosNode.ROS_CONNECTION_ERROR) {
+            mLog.error(getString(R.string.ros_init_error));
+            displayToastMessage(R.string.ros_init_error);
+        } else if (returnCode < TangoRosNode.SUCCESS) {
+            mLog.error(getString(R.string.tango_service_error));
+            displayToastMessage(R.string.tango_service_error);
+        }
     }
 }
