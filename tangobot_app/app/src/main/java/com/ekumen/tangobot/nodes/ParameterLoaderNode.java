@@ -9,6 +9,7 @@ import org.ros.node.parameter.ParameterTree;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,10 +21,20 @@ import java.util.Map;
 public class ParameterLoaderNode extends AbstractNodeMain {
 
     public static final String NODE_NAME = "parameter_loader";
-    private final Map<String, Object> params;
+    private final List<Map<String, Object>> params = new ArrayList<>();
 
     public ParameterLoaderNode(InputStream parameterYmlInputStream) {
-        this.params = (Map<String, Object>)(new Yaml()).load(parameterYmlInputStream);
+        addSingleYmlInput(parameterYmlInputStream);
+    }
+
+    public ParameterLoaderNode(List<InputStream> parameterListYmlInputStream) {
+        for (InputStream is: parameterListYmlInputStream) {
+            addSingleYmlInput(is);
+        }
+    }
+
+    private void addSingleYmlInput(InputStream ymlInputStream) {
+        this.params.add((Map<String, Object>)(new Yaml()).load(ymlInputStream));
     }
 
     private void addParams(ParameterTree parameterTree, Map<String, Object> params) {
@@ -66,7 +77,9 @@ public class ParameterLoaderNode extends AbstractNodeMain {
             // if it's not on / for a rosjava master
             // parameterTree.set(GraphName.root(), params);
             // Using an auxiliary function instead
-            addParams(parameterTree, params);
+            for (Map<String, Object> m : params) {
+                addParams(parameterTree, m);
+            }
 
             connectedNode.shutdown();
         }

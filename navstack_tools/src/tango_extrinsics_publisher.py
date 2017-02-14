@@ -6,7 +6,6 @@ import math
 import tf
 import geometry_msgs.msg
 from tf import transformations as t
-import sys
 
 # This script listens to the /tf topic and fetches transformations between 'start_of_service' and 'device' frames.
 # It assumes that the Tango device is turned on over the robot, so SOS frame has its Y axis pointing to the front of the robot (and Tango)
@@ -31,25 +30,17 @@ import sys
 # dev = device (Tango device)
 # rob = robot
 
-def main(argv):
+# SendTransform: (trans, rot, time, child, parent)
+
+if __name__ == '__main__':
     rospy.init_node('tango_tf_remapper')
 
     listener = tf.TransformListener()
     broadcaster = tf.TransformBroadcaster()
 
-    rate = rospy.Rate(200.0)
-    lastCommonTime = 0
-
     sourceFrame = '/start_of_service'
     childFrame = '/device'
-    
-    if len(argv) < 2:
-        print 'Using default target frames: odom -> base_footprint'
-        targetSourceFrame = 'odom'
-        targetChildFrame = 'base_footprint'
-    else:
-        targetSourceFrame = str(argv[0])
-        targetChildFrame = str(argv[1])
+    rate = rospy.Rate(200.0)
             
     # Static definitions: theta is the inclination angle [rad] of the dock holding the Tango device.
     theta = 1.267150092972726
@@ -59,17 +50,18 @@ def main(argv):
     tx_odom_sos = t.inverse_matrix(tx_sos_odom)
     tx_dev_rob = [[0, cos_t, -sin_t, 0], [-1, 0, 0, 0], [0, sin_t, cos_t, 0], [0, 0, 0, 1]]
     tx_rob_dev = t.inverse_matrix(tx_dev_rob)
+    
+    tx_odom_map = [[1, 0, 0, 5], [0, 1, 0, 5], [0, 0, 1, 0], [0, 0, 0, 1]]
+    tx_map_odom = t.inverse_matrix(tx_odom_map)
+
+    lastCommonTime = 0
 
     while not rospy.is_shutdown():
+        
         try:
             time = listener.getLatestCommonTime(sourceFrame, childFrame)
             if time <> lastCommonTime:
-                (trans,rot) = listener.lookupTransform(sourceFrame, childFrame, time)
-                
-                tx_dev_sos = t.concatenate_matrices(t.translation_matrix(trans), t.quaternion_matrix(rot))
-                tx_rob_sos = numpy.dot(tx_dev_sos, tx_rob_dev)
-                tx_rob_odom = numpy.dot(tx_sos_odom, tx_rob_sos)
-                
+
                 lastCommonTime = time
                 sendTransform = True
 
@@ -80,16 +72,24 @@ def main(argv):
         finally:
             if lastCommonTime == 0:
                 print 'Continuing..'
-
+        
         if sendTransform:
-            broadcaster.sendTransform(t.translation_from_matrix(tx_rob_odom), 
-                t.quaternion_from_matrix(tx_rob_odom),
-                rospy.Time.now(),
-                targetChildFrame,
-                targetSourceFrame)
-            sendTransform = False
+            broadcaster.sendTransform(t.translation_from_matrix(tx_sos_odom), 
+                t.quaternion_from_matrix(tx_sos_odom),
+                time,
+                'start_of_service',
+                'odom')
 
+            broadcaster.sendTransform(t.translation_from_matrix(tx_rob_dev), 
+                t.quaternion_from_matrix(tx_rob_dev),
+                time,
+                'base_footprint',
+                'device')
+                
+            broadcaster.sendTransform(t.translation_from_matrix(tx_odom_map), 
+                t.quaternion_from_matrix(tx_odom_map),
+                time,
+                'odom',
+                'map')
+            
         rate.sleep()
-
-if __name__ == "__main__":
-    main(sys.argv[1:])
