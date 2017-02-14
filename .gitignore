@@ -56,5 +56,6 @@
 *.cproject
 *.project
 
+# Symlink
+/CMakeLists.txt
 
-CMakeLists.txt
