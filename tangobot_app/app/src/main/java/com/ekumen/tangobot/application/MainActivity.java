@@ -41,11 +41,8 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
 
-import java.io.InputStream;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
@@ -72,13 +69,12 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
     private TangoRosNode mTangoRosNode;
     private MoveBaseNode mMoveBaseNode;
     private ParameterLoaderNode mParameterLoaderNode;
-    private static int[] mResourcesToLoad = {
-            R.raw.kobuki,
-            R.raw.costmap_common_params,
-            R.raw.dwa_local_planner_params,
-            R.raw.local_costmap_params
+
+    private static ParameterLoaderNode.NamedResource[] mResourcesToLoad = {
+            new ParameterLoaderNode.NamedResource(R.raw.costmap_common_params, MoveBaseNode.NODE_NAME + "/local_costmap"),
+            new ParameterLoaderNode.NamedResource(R.raw.costmap_common_params, MoveBaseNode.NODE_NAME + "/global_costmap"),
+            new ParameterLoaderNode.NamedResource(R.raw.local_costmap_params, MoveBaseNode.NODE_NAME + "/local_costmap")
     };
-    private static List<InputStream> mResourcesStreamList = new ArrayList<InputStream>();
 
     ServiceConnection mTangoServiceConnection = new TangoInitializationHelper.DefaultTangoServiceConnection(
         new AfterConnectionCallback() {
@@ -103,10 +99,6 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Load resources
-        for (int i : mResourcesToLoad) {
-            mResourcesStreamList.add(getResources().openRawResource(i));
-        }
         // UI
         setContentView(R.layout.main);
 
@@ -164,7 +156,7 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
         NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
         nodeConfiguration.setMasterUri(mMasterUri);
         nodeConfiguration.setNodeName(ParameterLoaderNode.NODE_NAME);
-        mParameterLoaderNode = new ParameterLoaderNode(mResourcesStreamList);
+        mParameterLoaderNode = new ParameterLoaderNode(mResourcesToLoad, this);
         mNodeMainExecutor.execute(mParameterLoaderNode, nodeConfiguration);
     }
 
