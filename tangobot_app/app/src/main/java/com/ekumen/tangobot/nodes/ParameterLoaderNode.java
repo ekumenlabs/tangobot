@@ -1,7 +1,24 @@
+/*
+ * Copyright 2017 Ekumen, Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.ekumen.tangobot.nodes;
 
-import android.util.Log;
-
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.logging.Log;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
@@ -14,46 +31,56 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Loads parameters from a Yaml file into ROS Parameter Server.
+ * Loads parameters from Yaml files into ROS Parameter Server.
+ * A different namespace can be specified for each of the files to load.
+ * To use this node, create a NamedResource array with the resources to load,
+ * and start it in the standard RosJava way.
  *
  * @author lucas@ekumenlabs.com (Lucas Chiesa).
+ * Modified by jubeira@ekumenlabs.com (Juan I. Ubeira)
  */
 public class ParameterLoaderNode extends AbstractNodeMain {
 
     public static final String NODE_NAME = "parameter_loader";
-    private final List<Map<String, Object>> params = new ArrayList<>();
+    private final List<Pair<String, LoadedRawResource>> params = new ArrayList<>();
+    private Log log;
 
-    public ParameterLoaderNode(InputStream parameterYmlInputStream) {
-        addSingleYmlInput(parameterYmlInputStream);
-    }
-
-    public ParameterLoaderNode(List<InputStream> parameterListYmlInputStream) {
-        for (InputStream is: parameterListYmlInputStream) {
-            addSingleYmlInput(is);
+    /**
+     * Default constructor
+     * @param resources Array of resources with their respective namespace to load.
+     */
+    public ParameterLoaderNode(ArrayList<Pair<InputStream, String>> resources) {
+        for(Pair<InputStream, String> nr : resources) {
+            addSingleYmlInput(nr.getLeft(), nr.getRight() == null ? "" : nr.getRight());
         }
     }
 
-    private void addSingleYmlInput(InputStream ymlInputStream) {
-        this.params.add((Map<String, Object>)(new Yaml()).load(ymlInputStream));
+    private void addSingleYmlInput(InputStream ymlInputStream, String namespace) {
+        this.params.add(new ImmutablePair<>(namespace, new LoadedRawResource((new Yaml()).load(ymlInputStream))));
     }
 
-    private void addParams(ParameterTree parameterTree, Map<String, Object> params) {
+    private void addParams(ParameterTree parameterTree, String namespace, Map<String, Object> params) {
         for(Map.Entry<String, Object> e: params.entrySet()) {
+            String fullKeyName = namespace + "/" + e.getKey();
+            if (log != null) {
+                log.info("Loading parameter " + fullKeyName + " \nValue = " + e.getValue());
+            }
+
             if(e.getValue() instanceof String) {
-                parameterTree.set(e.getKey(), (String)e.getValue());
+                parameterTree.set(fullKeyName, (String)e.getValue());
             } else if(e.getValue() instanceof Integer) {
-                parameterTree.set(e.getKey(), (Integer)e.getValue());
+                parameterTree.set(fullKeyName, (Integer)e.getValue());
             } else if(e.getValue() instanceof Double) {
-                parameterTree.set(e.getKey(), (Double)e.getValue());
+                parameterTree.set(fullKeyName, (Double)e.getValue());
             } else if(e.getValue() instanceof Map) {
-                parameterTree.set(e.getKey(), (Map)e.getValue());
+                parameterTree.set(fullKeyName, (Map)e.getValue());
             } else if(e.getValue() instanceof Boolean) {
-                parameterTree.set(e.getKey(), (Boolean)e.getValue());
+                parameterTree.set(fullKeyName, (Boolean)e.getValue());
             } else if(e.getValue() instanceof List) {
-                parameterTree.set(e.getKey(), (List)e.getValue());
-            } else {
-                Log.d(NODE_NAME, "I don't know what type parameter " + e.getKey() + " is. Value = " + e.getValue());
-                Log.d(NODE_NAME, "Class name is: " + e.getValue().getClass().getName());
+                parameterTree.set(fullKeyName, (List)e.getValue());
+            } else if (log != null) {
+                log.debug("I don't know what type parameter " + fullKeyName + " is. Value = " + e.getValue());
+                log.debug("Class name is: " + e.getValue().getClass().getName());
             }
         }
     }
@@ -71,17 +98,28 @@ public class ParameterLoaderNode extends AbstractNodeMain {
     public void onStart(ConnectedNode connectedNode) {
         if(params != null) {
             ParameterTree parameterTree = connectedNode.getParameterTree();
+            log = connectedNode.getLog();
 
             // TODO: For some reason, setting the / param when using a rosjava master doesn't work
             // It does work fine with an external master, and also setting other params of any type
-            // if it's not on / for a rosjava master
-            // parameterTree.set(GraphName.root(), params);
-            // Using an auxiliary function instead
-            for (Map<String, Object> m : params) {
-                addParams(parameterTree, m);
+            for (Pair<String, LoadedRawResource> m : params) {
+                addParams(parameterTree, m.getLeft(), m.getRight().resource);
             }
 
             connectedNode.shutdown();
+        }
+    }
+
+    /**
+     * Thin wrapper for the object returned by Yaml.load().
+     * The object returned by Yaml.load() is a LinkedHashMap<String, Object>; this class is to
+     * keep the code simple.
+     */
+    private class LoadedRawResource {
+        public Map<String, Object> resource;
+
+        LoadedRawResource(Object resource) {
+            this.resource = (Map<String, Object>) resource;
         }
     }
 }
