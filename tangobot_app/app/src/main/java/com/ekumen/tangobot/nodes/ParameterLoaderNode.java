@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Ekumen All Rights Reserved.
+ * Copyright 2017 Ekumen, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,9 @@ public class ParameterLoaderNode extends AbstractNodeMain {
     private void addParams(ParameterTree parameterTree, String namespace, Map<String, Object> params) {
         for(Map.Entry<String, Object> e: params.entrySet()) {
             String fullKeyName = namespace + "/" + e.getKey();
-            log.info("Loading parameter " + fullKeyName + " \nValue = " + e.getValue());
+            if (log != null) {
+                log.info("Loading parameter " + fullKeyName + " \nValue = " + e.getValue());
+            }
 
             if(e.getValue() instanceof String) {
                 parameterTree.set(fullKeyName, (String)e.getValue());
@@ -76,7 +78,7 @@ public class ParameterLoaderNode extends AbstractNodeMain {
                 parameterTree.set(fullKeyName, (Boolean)e.getValue());
             } else if(e.getValue() instanceof List) {
                 parameterTree.set(fullKeyName, (List)e.getValue());
-            } else {
+            } else if (log != null) {
                 log.debug("I don't know what type parameter " + fullKeyName + " is. Value = " + e.getValue());
                 log.debug("Class name is: " + e.getValue().getClass().getName());
             }
