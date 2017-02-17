@@ -54,8 +54,7 @@ def getTransformFromMatrix(matrix, childFrame, parentFrame):
     return static_transformStamped
 
 if __name__ == '__main__':
-#    rospy.init_node('tango_tf_remapper')
-    rospy.init_node('my_static_tf2_broadcaster')
+    rospy.init_node('static_tf2_broadcaster')
 
     listener = tf.TransformListener()
     broadcaster = tf2_ros.StaticTransformBroadcaster()

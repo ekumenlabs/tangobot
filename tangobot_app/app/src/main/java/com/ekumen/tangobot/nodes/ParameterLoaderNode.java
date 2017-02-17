@@ -1,9 +1,8 @@
 package com.ekumen.tangobot.nodes;
 
-import android.content.Context;
-import android.util.Log;
-import android.util.Pair;
-
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.logging.Log;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
@@ -28,27 +27,26 @@ public class ParameterLoaderNode extends AbstractNodeMain {
 
     public static final String NODE_NAME = "parameter_loader";
     private final List<Pair<String, LoadedRawResource>> params = new ArrayList<>();
+    private Log log;
 
     /**
      * Default constructor
      * @param resources Array of resources with their respective namespace to load.
-     * @param context Where to get resources from (e.g. caller Activity).
      */
-    public ParameterLoaderNode(NamedResource[] resources, Context context) {
-        for(NamedResource nr : resources) {
-            addSingleYmlInput(context.getResources().openRawResource(nr.first),
-                    nr.second == null ? "" : nr.second);
+    public ParameterLoaderNode(ArrayList<Pair<InputStream, String>> resources) {
+        for(Pair<InputStream, String> nr : resources) {
+            addSingleYmlInput(nr.getLeft(), nr.getRight() == null ? "" : nr.getRight());
         }
     }
 
     private void addSingleYmlInput(InputStream ymlInputStream, String namespace) {
-        this.params.add(new Pair<>(namespace, new LoadedRawResource((new Yaml()).load(ymlInputStream))));
+        this.params.add(new ImmutablePair<>(namespace, new LoadedRawResource((new Yaml()).load(ymlInputStream))));
     }
 
     private void addParams(ParameterTree parameterTree, String namespace, Map<String, Object> params) {
         for(Map.Entry<String, Object> e: params.entrySet()) {
             String fullKeyName = namespace + "/" + e.getKey();
-            Log.i(NODE_NAME, "Loading parameter " + fullKeyName + " \nValue = " + e.getValue());
+            log.info("Loading parameter " + fullKeyName + " \nValue = " + e.getValue());
 
             if(e.getValue() instanceof String) {
                 parameterTree.set(fullKeyName, (String)e.getValue());
@@ -63,8 +61,8 @@ public class ParameterLoaderNode extends AbstractNodeMain {
             } else if(e.getValue() instanceof List) {
                 parameterTree.set(fullKeyName, (List)e.getValue());
             } else {
-                Log.d(NODE_NAME, "I don't know what type parameter " + fullKeyName + " is. Value = " + e.getValue());
-                Log.d(NODE_NAME, "Class name is: " + e.getValue().getClass().getName());
+                log.debug("I don't know what type parameter " + fullKeyName + " is. Value = " + e.getValue());
+                log.debug("Class name is: " + e.getValue().getClass().getName());
             }
         }
     }
@@ -82,28 +80,15 @@ public class ParameterLoaderNode extends AbstractNodeMain {
     public void onStart(ConnectedNode connectedNode) {
         if(params != null) {
             ParameterTree parameterTree = connectedNode.getParameterTree();
+            log = connectedNode.getLog();
 
             // TODO: For some reason, setting the / param when using a rosjava master doesn't work
             // It does work fine with an external master, and also setting other params of any type
-            // if it's not on / for a rosjava master
-            // parameterTree.set(GraphName.root(), params);
-            // Using an auxiliary function instead
             for (Pair<String, LoadedRawResource> m : params) {
-                addParams(parameterTree, m.first, m.second.resource);
+                addParams(parameterTree, m.getLeft(), m.getRight().resource);
             }
 
             connectedNode.shutdown();
-        }
-    }
-
-    /**
-     * Wraps a generic Pair to represent a resource to be loaded (Integer) in
-     * a certain namespace (String).
-     * Use it to define which resources to load, specifying the namespace (prefix) for each one.
-     */
-    public static class NamedResource extends Pair<Integer, String> {
-        public NamedResource(Integer i, String s) {
-            super(i, s);
         }
     }
 

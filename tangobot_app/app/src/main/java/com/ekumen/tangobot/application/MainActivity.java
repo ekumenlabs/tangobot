@@ -33,6 +33,8 @@ import com.ekumen.tangobot.loaders.UsbDeviceNodeLoader;
 import com.ekumen.tangobot.nodes.MoveBaseNode;
 import com.ekumen.tangobot.nodes.ParameterLoaderNode;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.android.RosActivity;
@@ -41,7 +43,9 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
 
+import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -70,11 +74,13 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
     private MoveBaseNode mMoveBaseNode;
     private ParameterLoaderNode mParameterLoaderNode;
 
-    private static ParameterLoaderNode.NamedResource[] mResourcesToLoad = {
-            new ParameterLoaderNode.NamedResource(R.raw.costmap_common_params, MoveBaseNode.NODE_NAME + "/local_costmap"),
-            new ParameterLoaderNode.NamedResource(R.raw.costmap_common_params, MoveBaseNode.NODE_NAME + "/global_costmap"),
-            new ParameterLoaderNode.NamedResource(R.raw.local_costmap_params, MoveBaseNode.NODE_NAME + "/local_costmap")
-    };
+    private static ArrayList<ImmutablePair<Integer, String>> mResourcesToLoad = new ArrayList<ImmutablePair<Integer, String>>() {{
+        add(new ImmutablePair<>(R.raw.costmap_common_params, MoveBaseNode.NODE_NAME + "/local_costmap"));
+        add(new ImmutablePair<>(R.raw.costmap_common_params, MoveBaseNode.NODE_NAME + "/global_costmap"));
+        add(new ImmutablePair<>(R.raw.local_costmap_params, MoveBaseNode.NODE_NAME + "/local_costmap"));
+    }};
+
+    private ArrayList<Pair<InputStream, String>> mOpenedResources = new ArrayList<>();
 
     ServiceConnection mTangoServiceConnection = new TangoInitializationHelper.DefaultTangoServiceConnection(
         new AfterConnectionCallback() {
@@ -98,6 +104,12 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Load raw resources
+        for (Pair<Integer, String> ip : mResourcesToLoad) {
+            mOpenedResources.add(new ImmutablePair<>(
+                    getResources().openRawResource(ip.getLeft().intValue()), ip.getRight()));
+        }
 
         // UI
         setContentView(R.layout.main);
@@ -156,7 +168,7 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
         NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
         nodeConfiguration.setMasterUri(mMasterUri);
         nodeConfiguration.setNodeName(ParameterLoaderNode.NODE_NAME);
-        mParameterLoaderNode = new ParameterLoaderNode(mResourcesToLoad, this);
+        mParameterLoaderNode = new ParameterLoaderNode(mOpenedResources);
         mNodeMainExecutor.execute(mParameterLoaderNode, nodeConfiguration);
     }
 
