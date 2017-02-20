@@ -26,6 +26,7 @@ import android.content.ServiceConnection;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
+import android.util.Pair;
 import android.widget.Toast;
 
 import com.ekumen.tangobot.loaders.KobukiNodeLoader;
@@ -33,8 +34,6 @@ import com.ekumen.tangobot.loaders.UsbDeviceNodeLoader;
 import com.ekumen.tangobot.nodes.MoveBaseNode;
 import com.ekumen.tangobot.nodes.ParameterLoaderNode;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.android.RosActivity;
@@ -43,7 +42,6 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
 
-import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,13 +72,13 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
     private MoveBaseNode mMoveBaseNode;
     private ParameterLoaderNode mParameterLoaderNode;
 
-    private static ArrayList<ImmutablePair<Integer, String>> mResourcesToLoad = new ArrayList<ImmutablePair<Integer, String>>() {{
-        add(new ImmutablePair<>(R.raw.costmap_common_params, MoveBaseNode.NODE_NAME + "/local_costmap"));
-        add(new ImmutablePair<>(R.raw.costmap_common_params, MoveBaseNode.NODE_NAME + "/global_costmap"));
-        add(new ImmutablePair<>(R.raw.local_costmap_params, MoveBaseNode.NODE_NAME + "/local_costmap"));
+    private static ArrayList<Pair<Integer, String>> mResourcesToLoad = new ArrayList<Pair<Integer, String>>() {{
+        add(new Pair<>(R.raw.costmap_common_params, MoveBaseNode.NODE_NAME + "/local_costmap"));
+        add(new Pair<>(R.raw.costmap_common_params, MoveBaseNode.NODE_NAME + "/global_costmap"));
+        add(new Pair<>(R.raw.local_costmap_params, MoveBaseNode.NODE_NAME + "/local_costmap"));
     }};
 
-    private ArrayList<Pair<InputStream, String>> mOpenedResources = new ArrayList<>();
+    private ArrayList<ParameterLoaderNode.Resource> mOpenedResources = new ArrayList<>();
 
     ServiceConnection mTangoServiceConnection = new TangoInitializationHelper.DefaultTangoServiceConnection(
         new AfterConnectionCallback() {
@@ -107,8 +105,8 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
 
         // Load raw resources
         for (Pair<Integer, String> ip : mResourcesToLoad) {
-            mOpenedResources.add(new ImmutablePair<>(
-                    getResources().openRawResource(ip.getLeft().intValue()), ip.getRight()));
+            mOpenedResources.add(new ParameterLoaderNode.Resource(
+                    getResources().openRawResource(ip.first.intValue()), ip.second));
         }
 
         // UI

@@ -16,8 +16,6 @@
 
 package com.ekumen.tangobot.nodes;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
@@ -42,21 +40,21 @@ import java.util.Map;
 public class ParameterLoaderNode extends AbstractNodeMain {
 
     public static final String NODE_NAME = "parameter_loader";
-    private final List<Pair<String, LoadedRawResource>> params = new ArrayList<>();
+    private final List<LoadedResource> params = new ArrayList<>();
     private Log log;
 
     /**
      * Default constructor
      * @param resources Array of resources with their respective namespace to load.
      */
-    public ParameterLoaderNode(ArrayList<Pair<InputStream, String>> resources) {
-        for(Pair<InputStream, String> nr : resources) {
-            addSingleYmlInput(nr.getLeft(), nr.getRight() == null ? "" : nr.getRight());
+    public ParameterLoaderNode(ArrayList<Resource> resources) {
+        for(Resource r : resources) {
+            addSingleYmlInput(r.inputStream, r.namespace == null ? "" : r.namespace);
         }
     }
 
     private void addSingleYmlInput(InputStream ymlInputStream, String namespace) {
-        this.params.add(new ImmutablePair<>(namespace, new LoadedRawResource((new Yaml()).load(ymlInputStream))));
+        this.params.add(new LoadedResource((new Yaml()).load(ymlInputStream), namespace));
     }
 
     private void addParams(ParameterTree parameterTree, String namespace, Map<String, Object> params) {
@@ -102,11 +100,24 @@ public class ParameterLoaderNode extends AbstractNodeMain {
 
             // TODO: For some reason, setting the / param when using a rosjava master doesn't work
             // It does work fine with an external master, and also setting other params of any type
-            for (Pair<String, LoadedRawResource> m : params) {
-                addParams(parameterTree, m.getLeft(), m.getRight().resource);
+            for (LoadedResource r : params) {
+                addParams(parameterTree, r.namespace, r.resource);
             }
 
             connectedNode.shutdown();
+        }
+    }
+
+    /**
+     * Resource to load to Parameter Server, consisting of an InputStream and its corresponding namespace.
+     */
+    public static class Resource {
+        public InputStream inputStream;
+        public String namespace;
+
+        public Resource(InputStream inputStream, String namespace) {
+            this.inputStream = inputStream;
+            this.namespace = namespace;
         }
     }
 
@@ -115,11 +126,13 @@ public class ParameterLoaderNode extends AbstractNodeMain {
      * The object returned by Yaml.load() is a LinkedHashMap<String, Object>; this class is to
      * keep the code simple.
      */
-    private class LoadedRawResource {
+    private class LoadedResource {
         public Map<String, Object> resource;
+        public String namespace;
 
-        LoadedRawResource(Object resource) {
+        LoadedResource(Object resource, String namespace) {
             this.resource = (Map<String, Object>) resource;
+            this.namespace = namespace;
         }
     }
 }
