@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>tangobot_app</name>
+  <name>usb_serial_for_android</name>
   <version>0.1.0</version>
-  <description>The tangobot_app package</description>
+  <description>The usb_serial_android_latest package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but mutiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/tangobot_app</url> -->
+  <!-- <url type="website">http://wiki.ros.org/usb_serial_android_latest</url> -->
 
 
   <!-- Author tags are optional, mutiple are allowed, one per tag -->
@@ -40,13 +40,8 @@
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>android_core</build_depend>
   <build_depend>rosjava_build_tools</build_depend>
-  <build_depend>rosjava_core</build_depend>
-  <build_depend>std_msgs</build_depend>
-  <build_depend>base_controller</build_depend>
-  <build_depend>usb_serial_for_android</build_depend>
-  <build_depend>tango_ros_java</build_depend>
+
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

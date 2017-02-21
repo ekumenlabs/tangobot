@@ -1,12 +1,14 @@
 package com.ekumen.tangobot.loaders;
 
 import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 
 import com.ekumen.base_controller.BaseControllerNode;
 import com.ekumen.base_controller.BaseOdomPublisher;
 import com.ekumen.base_driver.BaseDevice;
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
+import com.hoho.android.usbserial.driver.UsbSerialPort;
 
 import org.ros.namespace.GraphName;
 import org.ros.node.NodeConfiguration;
@@ -29,7 +31,7 @@ public abstract class AbstractBaseNodeLoader extends UsbDeviceNodeLoader {
         super(nme, rosMasterUri, rosHostname);
     }
 
-    protected abstract BaseDevice getBaseDevice(UsbSerialDriver driver) throws Exception;
+    protected abstract BaseDevice getBaseDevice(UsbSerialPort port, UsbDeviceConnection connection) throws Exception;
 
     @Override
     public NodeMain[] startNodes(UsbDevice baseUsbDevice, UsbManager usbManager) throws Exception {
@@ -40,10 +42,17 @@ public abstract class AbstractBaseNodeLoader extends UsbDeviceNodeLoader {
 
         // Wrap the UsbDevice in the HoHo Driver
         UsbSerialDriver driver = serialDriverForDevice(baseUsbDevice, usbManager);
+        UsbDeviceConnection connection = serialConnectionForDevice(usbManager, driver);
+
+        if (connection == null) {
+            throw new Exception("No USB connection available to initialize device");
+        }
+
+        UsbSerialPort port = serialPortForDevice(driver);
 
         // Choose the appropriate BaseDevice implementation for the particular
         // robot base, using the corresponding subclass
-        BaseDevice baseDevice = getBaseDevice(driver);
+        BaseDevice baseDevice = getBaseDevice(port, connection);
 
         // Create the ROS nodes
         log.info("Create base controller node");
@@ -52,7 +61,6 @@ public abstract class AbstractBaseNodeLoader extends UsbDeviceNodeLoader {
         baseControllerNodeConf.setNodeName(GraphName.of("base_controller"));
         baseControllerNodeConf.setMasterUri(rosMasterUri);
         nodeMainExecutor.execute(baseControllerNode, baseControllerNodeConf);
-
 
         log.info("Creating odom publisher node");
         baseOdomPublisher = new BaseOdomPublisher(baseDevice);
