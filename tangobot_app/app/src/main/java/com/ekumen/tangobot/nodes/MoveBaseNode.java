@@ -17,8 +17,8 @@ public class MoveBaseNode extends NativeNodeMain {
     }
 
     @Override
-    protected native void execute(String rosMasterUri, String rosHostname, String nodeName, String[] remappingArguments);
+    protected native int execute(String rosMasterUri, String rosHostname, String nodeName, String[] remappingArguments);
 
     @Override
-    protected native void shutdown();
+    protected native int shutdown();
 }
