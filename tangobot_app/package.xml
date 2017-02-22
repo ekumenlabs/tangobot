@@ -45,7 +45,7 @@
   <build_depend>rosjava_core</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>base_controller</build_depend>
-  <build_depend>usb_serial_for_android</build_depend>
+  <build_depend>usb_serial_for_android_catkin</build_depend>
   <build_depend>tango_ros_java</build_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
