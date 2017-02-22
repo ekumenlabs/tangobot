@@ -32,11 +32,11 @@ import android.widget.Toast;
 import com.ekumen.tangobot.loaders.KobukiNodeLoader;
 import com.ekumen.tangobot.loaders.UsbDeviceNodeLoader;
 import com.ekumen.tangobot.nodes.MoveBaseNode;
-import com.ekumen.tangobot.nodes.ParameterLoaderNode;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.android.RosActivity;
+import org.ros.helpers.ParameterLoaderNode;
 import org.ros.node.ConnectedNode;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
