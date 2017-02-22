@@ -59,10 +59,11 @@ dependencies {
   compile 'org.ros.rosjava_messages:std_msgs:[0.3,)'
   compile 'org.ros.rosjava_messages:sensor_msgs:[0.3,)'
   compile 'org.ros.rosjava_messages:geometry_msgs:[0.3,)'
+  compile 'org.ros.rosjava_core:rosjava_helpers:[0.3, 0.4)'
 
-  compile 'com.hoho.android.usbserial:UsbSerialLibrary:[0.1, 0.2)'
-  compile 'com.ekumen.base_controller:base_controller_lib:[0.1, 0.2)'
+  compile 'com.hoho.android:usb-serial-for-android:[0.2, 0.3)'
+  compile 'com.ekumen.base_controller:base_controller_lib:[0.2, 0.3)'
   compile 'org.yaml:snakeyaml:[1.17, 1.18)'
 
-  compile 'eu.intermodalics:tango_ros_node:[0.1,)'
+  compile 'eu.intermodalics:tango_ros_node:[1.0, 1.1)'
 }

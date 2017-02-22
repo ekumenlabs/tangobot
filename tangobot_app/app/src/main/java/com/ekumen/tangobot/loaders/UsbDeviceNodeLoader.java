@@ -1,9 +1,11 @@
 package com.ekumen.tangobot.loaders;
 
 import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
+import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
 
 import org.apache.commons.logging.Log;
@@ -38,15 +40,23 @@ public abstract class UsbDeviceNodeLoader {
      */
     protected UsbSerialDriver serialDriverForDevice(UsbDevice device, UsbManager usbManager) throws Exception {
         // Wrap the UsbDevice in the HoHo Driver
-        List<UsbSerialDriver> driverList = UsbSerialProber.probeSingleDevice(usbManager, device);
+        List<UsbSerialDriver> driverList = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager);
         // For now, continue only if we have a single driver in the list
-        if(driverList.isEmpty()) {
+        if (driverList.isEmpty()) {
             throw new Exception("No drivers found for the supplied USB device: " + device);
         }
-        if(driverList.size() > 1) {
+        if (driverList.size() > 1) {
             log.warn("There are " + driverList.size() + " drivers found for the provided USB device: "
                     + device + ". Will continue using the first one in the list");
         }
         return driverList.get(0);
+    }
+
+    protected UsbDeviceConnection serialConnectionForDevice(UsbManager manager, UsbSerialDriver driver) {
+        return manager.openDevice(driver.getDevice());
+    }
+
+    protected UsbSerialPort serialPortForDevice(UsbSerialDriver driver) {
+        return driver.getPorts().get(0);
     }
 }

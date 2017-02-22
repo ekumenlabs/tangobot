@@ -2,9 +2,11 @@ package com.ekumen.tangobot.loaders;
 
 
 
-import com.hoho.android.usbserial.driver.UsbSerialDriver;
-import com.ekumen.base_driver.kobuki.KobukiBaseDevice;
+import android.hardware.usb.UsbDeviceConnection;
+
 import com.ekumen.base_driver.BaseDevice;
+import com.ekumen.base_driver.kobuki.KobukiBaseDevice;
+import com.hoho.android.usbserial.driver.UsbSerialPort;
 
 import org.ros.node.NodeMainExecutor;
 
@@ -19,7 +21,7 @@ public class KobukiNodeLoader extends AbstractBaseNodeLoader {
     }
 
     @Override
-    protected BaseDevice getBaseDevice(UsbSerialDriver driver) throws Exception {
-        return new KobukiBaseDevice(driver);
+    protected BaseDevice getBaseDevice(UsbSerialPort port, UsbDeviceConnection connection) throws Exception {
+        return new KobukiBaseDevice(port, connection);
     }
 }
