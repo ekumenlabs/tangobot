@@ -17,8 +17,8 @@ class MoveBaseNodeExecutor {
         MoveBaseNodeExecutor();
         ~MoveBaseNodeExecutor();
 
-        void Execute(const char* master_uri, const char* host_ip, const char* node_name);
-        void Shutdown();
+        int Execute(const char* master_uri, const char* host_ip, const char* node_name);
+        int Shutdown();
 };
 
 } // namespace move_base_util
