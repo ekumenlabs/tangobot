@@ -29,7 +29,7 @@ int InitRos(const char* master_uri, const char* host_ip,
     int argc = 3;
     char* master_uri_copy = strdup(master_uri);
     char* host_ip_copy = strdup(host_ip);
-    char* argv[] = {"nothing_important" , master_uri_copy, host_ip_copy};
+    char* argv[] = {"nothing_important", master_uri_copy, host_ip_copy};
 
     log(std::ostringstream()
         << "\nMaster: " << master_uri_copy << "\n"
@@ -51,12 +51,11 @@ MoveBaseNodeExecutor::MoveBaseNodeExecutor() {}
 
 MoveBaseNodeExecutor::~MoveBaseNodeExecutor() {}
 
-void MoveBaseNodeExecutor::Execute(const char* master_uri, const char* host_ip, const char* node_name) {
-    // TODO on rosjava update: use node_name as parameter. In current NativeNodeMain, libname is used.
-    // TODO (2): handle error code using new NativeNodeMain's API.
-    int result = InitRos(master_uri, host_ip, "move_base");
+int MoveBaseNodeExecutor::Execute(const char* master_uri, const char* host_ip,
+                                  const char* node_name) {
+    int result = InitRos(master_uri, host_ip, node_name);
     if (result == ROS_INIT_ERROR) {
-        return;
+        return result;
     }
 
     ros::NodeHandle n;
@@ -65,12 +64,16 @@ void MoveBaseNodeExecutor::Execute(const char* master_uri, const char* host_ip, 
     move_base::MoveBase move_base(tf);
 
     ros::WallRate loop_rate(100);
-    while(ros::ok()) {
+
+    while (ros::ok()) {
         ros::spinOnce();
         loop_rate.sleep();
     }
+
+    return 0;
 }
 
-void MoveBaseNodeExecutor::Shutdown() {}
-
+int MoveBaseNodeExecutor::Shutdown() {
+    return 0;
+}
 }

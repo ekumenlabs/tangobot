@@ -27,9 +27,7 @@ JNIEXPORT jint JNICALL Java_com_ekumen_tangobot_nodes_MoveBaseNode_execute
     env->ReleaseStringUTFChars(node_name_value, node_name);
 
     move_base_util::MoveBaseNodeExecutor moveBaseNodeExecutor;
-    moveBaseNodeExecutor.Execute(master.c_str(), host.c_str(), node.c_str());
-
-    return 0;
+    return moveBaseNodeExecutor.Execute(master.c_str(), host.c_str(), node.c_str());
 }
 
 JNIEXPORT jint JNICALL Java_com_ekumen_tangobot_nodes_MoveBaseNode_shutdown
