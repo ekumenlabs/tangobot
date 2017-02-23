@@ -54,7 +54,7 @@ def getTransformFromMatrix(matrix, childFrame, parentFrame):
     return static_transformStamped
 
 if __name__ == '__main__':
-    rospy.init_node('static_tf2_broadcaster')
+    rospy.init_node('static_extrinsics_broadcaster')
 
     listener = tf.TransformListener()
     broadcaster = tf2_ros.StaticTransformBroadcaster()
@@ -67,10 +67,18 @@ if __name__ == '__main__':
     theta = 1.267150092972726
     sin_t = numpy.sin(theta)
     cos_t = numpy.cos(theta)
-    tx_sos_odom = [[0, 1, 0, 0], [-1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+    robot_height = 0.5  # In meters
+    v_device_base = [0, 0, -robot_height]
+        
+    tx_sos_odom = [[0, 1, 0, 0], [-1, 0, 0, 0], [0, 0, 1, robot_height], [0, 0, 0, 1]]
     tx_odom_sos = t.inverse_matrix(tx_sos_odom)
-    tx_dev_rob = [[0, cos_t, -sin_t, 0], [-1, 0, 0, 0], [0, sin_t, cos_t, 0], [0, 0, 0, 1]]
-    tx_rob_dev = t.inverse_matrix(tx_dev_rob)
+    
+    
+    tx_dev_devStraight = [[0, cos_t, -sin_t, 0], [-1, 0, 0, 0], [0, sin_t, cos_t, 0], [0, 0, 0, 1]]
+    tx_devStraight_dev = t.inverse_matrix(tx_dev_devStraight)
+    tx_rob_devStraight = t.translation_matrix(v_device_base)
+    
+    tx_rob_dev = numpy.dot(tx_devStraight_dev, tx_rob_devStraight)
     
     tx_odom_map = [[1, 0, 0, 5], [0, 1, 0, 5], [0, 0, 1, 0], [0, 0, 0, 1]]
     tx_map_odom = t.inverse_matrix(tx_odom_map)

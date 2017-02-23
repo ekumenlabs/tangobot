@@ -62,12 +62,6 @@ public abstract class AbstractBaseNodeLoader extends UsbDeviceNodeLoader {
         baseControllerNodeConf.setMasterUri(rosMasterUri);
         nodeMainExecutor.execute(baseControllerNode, baseControllerNodeConf);
 
-        log.info("Creating odom publisher node");
-        baseOdomPublisher = new BaseOdomPublisher(baseDevice);
-        NodeConfiguration odomPublisherNodeConf = NodeConfiguration.newPublic(rosHostname);
-        odomPublisherNodeConf.setMasterUri(rosMasterUri);
-        nodeMainExecutor.execute(baseOdomPublisher, odomPublisherNodeConf);
-
         return new NodeMain[]{ baseControllerNode, baseOdomPublisher };
     }
 }

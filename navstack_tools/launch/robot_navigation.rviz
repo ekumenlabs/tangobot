@@ -220,12 +220,12 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-          Value: true
+          Value: false
         wheel_right_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-          Value: true
+          Value: false
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
@@ -419,7 +419,7 @@ Visualization Manager:
           Size (Pixels): 3
           Size (m): 0.04
           Style: Flat Squares
-          Topic: /move_base/DWAPlannerROS/cost_cloud
+          Topic: /tango/point_cloud
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
