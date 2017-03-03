@@ -1,0 +1,6 @@
+<!-- Launchfile to start turtlebot navigation in an empty map -->
+<launch>
+	<include file="$(find turtlebot_bringup)/launch/minimal.launch"/>
+	<include file="$(find std_turtlebot)/launch/empty_map_demo.launch"/>
+	<include file="$(find navstack_tools)/launch/map_to_odom.launch"/>
+</launch>
