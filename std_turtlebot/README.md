@@ -8,17 +8,17 @@ mkdir -p ~/tangobot_ws/src
 cd ~/tangobot_ws/src
 git clone https://github.com/ekumenlabs/tangobot
 ```
-Then, build this package if you didn't build the whole tangobot already, and source the workspace script:
-```
-cd ~/tangobot_ws
-catkin_make --pkg std_turtlebot
-source devel/setup.bash
-```
-Finally, install all the package dependencies in case you don't have all the turtlebot dependencies installed already:
+Install all the package dependencies in case you don't have all the turtlebot dependencies installed already:
 ```
 cd ~/tangobot_ws/src/tangobot/std_turtlebot
 sudo apt-get update
 rosdep install std_turtlebot
+```
+Finally, build this package and source the workspace script:
+```
+cd ~/tangobot_ws
+catkin_make --pkg std_turtlebot
+source devel/setup.bash
 ```
 Note: you should install this package in your computer and your laptop.
 
@@ -26,14 +26,14 @@ Note: you should install this package in your computer and your laptop.
 From your laptop, start a ROS master. Connect the laptop to the turtlebot, and to the Kinect sensor (this one is optional; if no sensor is connected the robot will navigate blind).
 Then, run the start script:
 ```
-rosrun std_turtlebot start_turtlebot_baseline.sh
+roslaunch std_turtlebot turtlebot_baseline.launch
 ```
 You are done! Your turtlebot is now running in your laptop.
 You will want to see the turtlebot in your computer and send some target goals. To do so, follow these steps from your computer:
 ```
 export ROS_MASTER_URI=http://TURTLEBOT_IP_ADDRESS:11311
-rosrun std_turtlebot start_visualization.sh -nav
+roslaunch std_turtlebot view_navigation.launch
 ```
 
 You should now see your turtlebot in the middle of an empty map, along with its costmaps and the laser scan. You can send navigation goals using RVIZ.
-Optionally, run the script with no arguments to view the robot model only, without the maps. You can manually add them later.
+Optionally, use the launchfile named `view_model.launch` to view the robot model only, without the maps. You can manually add them later.
