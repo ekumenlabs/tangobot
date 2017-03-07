@@ -1,4 +1,6 @@
 #local_costmap
+# The base namespace for these parameters is configured outside the Yaml file.
+
  global_frame: odom
  robot_base_frame: /base_footprint
  update_frequency: 5.0
