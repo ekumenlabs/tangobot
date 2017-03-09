@@ -77,6 +77,10 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
         add(new Pair<>(R.raw.costmap_common_params, MoveBaseNode.NODE_NAME + "/global_costmap"));
         add(new Pair<>(R.raw.local_costmap_params, MoveBaseNode.NODE_NAME + "/local_costmap"));
         add(new Pair<>(R.raw.global_costmap_params, MoveBaseNode.NODE_NAME + "/global_costmap"));
+        add(new Pair<>(R.raw.dwa_local_planner_params, MoveBaseNode.NODE_NAME + "/DWAPlannerROS"));
+        add(new Pair<>(R.raw.move_base_params, MoveBaseNode.NODE_NAME));
+        add(new Pair<>(R.raw.global_planner_params, MoveBaseNode.NODE_NAME + "/GlobalPlanner"));
+        add(new Pair<>(R.raw.navfn_global_planner_params, MoveBaseNode.NODE_NAME + "/NavfnROS"));
     }};
 
     private ArrayList<ParameterLoaderNode.Resource> mOpenedResources = new ArrayList<>();

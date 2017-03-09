@@ -1,4 +1,6 @@
 #global_costmap:
+# The base namespace for these parameters is configured outside the Yaml file.
+
  global_frame: /map
  robot_base_frame: /base_footprint
  update_frequency: 1.0

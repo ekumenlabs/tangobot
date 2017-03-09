@@ -83,6 +83,7 @@ if __name__ == '__main__':
                 print 'Continuing..'
         
         if sendTransform:
+            sendTransform = False
             broadcaster.sendTransform(t.translation_from_matrix(tx_sos_odom), 
                 t.quaternion_from_matrix(tx_sos_odom),
                 time,
