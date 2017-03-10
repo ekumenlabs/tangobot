@@ -1,0 +1,11 @@
+<!--
+  Tangobot visualization & navigation stack
+-->
+<launch>
+  <!-- velocity commands remapper -->
+  <node pkg="navstack_tools" name="remapTopics" type="remapTopics" args="/navigation_velocity_smoother/raw_cmd_vel /cmd_vel"/>
+  <!-- Start robot model --> 
+  <include file="$(find navstack_tools)/launch/tangobot_demo_visualizer.launch"/>
+  <!-- Start navstack and publish map --> 
+  <include file="$(find navstack_tools)/launch/tools/navstack.launch"/>
+</launch>

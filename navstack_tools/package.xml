@@ -20,6 +20,14 @@
   <run_depend>tf2</run_depend>
   <run_depend>tf2_ros</run_depend>
 
+  <!-- Packages for turtlebot metapackage -->
+  <run_depend>turtlebot_bringup</run_depend>
+
+  <!-- Packages for turtlebot apps metapackage -->
+  <run_depend>turtlebot_navigation</run_depend>
+
+  <!-- Packages for turtlebot interactions metapackage -->  
+  <run_depend>turtlebot_rviz_launchers</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

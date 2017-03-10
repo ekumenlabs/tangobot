@@ -43,29 +43,20 @@ catkin_make
 Congratulations! You just built your apk file. You can find it in `tangobot_app/app/build/outputs/apk`. You can install it using `adb install app-debug.apk` from that directory.
 
 # Running the app demo
-Run a `roscore` in your computer and connect your device to your robot base using a "USB on the go" cable. The device's main camera should have the same direction of the robot's front. Launch the application, and specify your PC's IP address to connect to the ROS master (you may optionally run the ROS master on the device directly; for this example we will assume that the ROS master is running on your computer). Then, follow these steps:
+Run a `roscore` in your computer and connect your device to your robot base using a "USB on the go" cable. The device's main camera should have the same direction of the robot's front. Launch the application, and specify your PC's IP address to connect to the ROS master (you may optionally run the ROS master on the device directly; for this example we will assume that the ROS master is running on your computer). Then, run the visualizer:
 
-* Source the empty map:
-```
-roscd navstack_tools/map
-source source_empty_map
-```
-* Turn on the device pose publisher and the point cloud:
-```
-rosrun dynamic_reconfigure dynparam set /tango publish_device_pose true
-rosrun dynamic_reconfigure dynparam set /tango publish_point_cloud true
-```
-* Run the extrinsics publisher in a different terminal. This will publish the proper transforms between the different frames of your system:
-```
-rosrun navstack_tools tango_extrinsics_publisher.py
-```
-* Finally, run the visualizer:
 ```
 roslaunch navstack_tools turtlebot_demo_visualizer.launch
 ```
 
-You should now see the robot in the center of an empty map in RVIZ, along with the robot's point cloud. You can now send goal poses from there to navigate.
-You can turn off the point cloud by running 
+You should now see the robot in the center of an empty map in RVIZ. You can now send goal poses from there to navigate.
+You can turn on/off the point cloud for obstacle avoidance by running 
 ```
-rosrun dynamic_reconfigure dynparam set /tango publish_point_cloud false
+rosrun dynamic_reconfigure dynparam set /tango publish_point_cloud [true/false]
+```
+
+### Running the navigation stack in your computer
+You may choose to run the navigation stack in your computer optionally. After following the steps described above, run the following command:
+```
+roslaunch navstack_tools turtlebot_navigation_bringup.launch
 ```
