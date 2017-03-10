@@ -32,11 +32,11 @@ import android.widget.Toast;
 import com.ekumen.tangobot.loaders.KobukiNodeLoader;
 import com.ekumen.tangobot.loaders.UsbDeviceNodeLoader;
 import com.ekumen.tangobot.nodes.MoveBaseNode;
+import com.ekumen.tangobot.nodes.ParameterLoaderNode;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.android.RosActivity;
-import org.ros.helpers.ParameterLoaderNode;
 import org.ros.node.ConnectedNode;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
@@ -160,18 +160,28 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
             manager.requestPermission(device, mUsbPermissionIntent);
         }
 
-        startParameterLoaderNode();
+        CountDownLatch latch = new CountDownLatch(1);
+        startParameterLoaderNode(latch);
+
+        try {
+            mLog.info("Waiting for parameter latch release...");
+            latch.await();
+            mLog.info("Parameter latch released!");
+        } catch (InterruptedException ie) {
+            mLog.warn("Warning: continuing before parameter latch was released");
+        }
+
         startTangoRosNode();
         startMoveBaseNode();
     }
 
-    private void startParameterLoaderNode() {
+    private void startParameterLoaderNode(CountDownLatch latch) {
         // Create node to load configuration to Parameter Server
         mLog.info("Setting parameters in Parameter Server");
         NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
         nodeConfiguration.setMasterUri(mMasterUri);
         nodeConfiguration.setNodeName(ParameterLoaderNode.NODE_NAME);
-        mParameterLoaderNode = new ParameterLoaderNode(mOpenedResources);
+        mParameterLoaderNode = new ParameterLoaderNode(mOpenedResources, latch);
         mNodeMainExecutor.execute(mParameterLoaderNode, nodeConfiguration);
     }
 
