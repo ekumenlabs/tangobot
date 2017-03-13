@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>navstack_tools</name>
+  <name>navigation_setup</name>
   <version>0.1.0</version>
-  <description>The navstack_tools package</description>
+  <description>A helper package to get navigation stacks up and running.</description>
 
   <maintainer email="jubeira@ekumenlabs.com">Juan Ignacio Ubeira</maintainer>
 
@@ -20,6 +20,14 @@
   <run_depend>tf2</run_depend>
   <run_depend>tf2_ros</run_depend>
 
+  <!-- Packages for turtlebot metapackage -->
+  <run_depend>turtlebot_bringup</run_depend>
+
+  <!-- Packages for turtlebot apps metapackage -->
+  <run_depend>turtlebot_navigation</run_depend>
+
+  <!-- Packages for turtlebot interactions metapackage -->  
+  <run_depend>turtlebot_rviz_launchers</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
