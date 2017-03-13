@@ -7,7 +7,7 @@
   <arg name="3d_sensor"  default="$(optenv TURTLEBOT_3D_SENSOR kinect)"/>  <!-- kinect, asus_xtion_pro -->
 
   <!-- Name of the map to use (without path nor extension) and initial position -->
-  <arg name="map_file"       default="$(find navstack_tools)/map/empty.yaml"/>
+  <arg name="map_file"       default="$(find navigation_setup)/map/empty.yaml"/>
 
   <param name="/use_sim_time" value="false"/>   <!-- False if we are not using simulation-->
 
@@ -22,15 +22,15 @@
   </node>
 
   <!--  ****** Maps *****  -->
-  <include file="$(find navstack_tools)/launch/tools/map.launch">
+  <include file="$(find navigation_setup)/launch/tools/map.launch">
     <arg name="map_file" value="$(arg map_file)"/>
   </include>
 
   <!-- publish device pose -->
   <node pkg="dynamic_reconfigure" name="dynparam" type="dynparam" args="set /tango publish_device_pose true"/>
   <!-- publish remaining transformations -->
-  <node pkg="navstack_tools" name="tango_extrinsics_publisher" type="tango_extrinsics_publisher"/>
+  <node pkg="navigation_setup" name="tango_extrinsics_publisher" type="tango_extrinsics_publisher"/>
 
   <!--  **************** Visualisation ****************  -->
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find navstack_tools)/include/robot_navigation.rviz"/>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find navigation_setup)/include/robot_navigation.rviz"/>
 </launch>

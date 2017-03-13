@@ -8,9 +8,9 @@
   </include>
 
   <include file="$(find std_turtlebot)/launch/tools/empty_map_demo.launch">
-    <arg name="map_file" value="$(find navstack_tools)/map/empty.yaml"/>
+    <arg name="map_file" value="$(find navigation_setup)/map/empty.yaml"/>
     <arg name="3d_sensor" value="$(arg 3d_sensor)"/>
   </include>
 
-  <include file="$(find navstack_tools)/launch/tools/map_to_odom.launch"/>
+  <include file="$(find navigation_setup)/launch/tools/map_to_odom.launch"/>
 </launch>

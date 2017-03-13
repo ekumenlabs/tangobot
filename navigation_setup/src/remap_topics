@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
+"""
+This script remaps a given Twist topic into another one, using an anonymous node.
+It takes the source and target topics as parameters:
+remap_topics [source] [target]
+"""
+
 import rospy
 import sys
 from geometry_msgs.msg import Twist
-
-#global pub
-
 
 def receive(data):
   global pub
@@ -16,7 +19,7 @@ def main(argv):
   global pub
 
   if len(argv) < 2:
-    print 'Usage: remapTopics.py [Source topic] [Target topic]'
+    print 'Usage: remap_topics [Source topic] [Target topic]'
     return
 
   sourceTopic = str(argv[0])

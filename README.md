@@ -46,7 +46,7 @@ Congratulations! You just built your apk file. You can find it in `tangobot_app/
 Run a `roscore` in your computer and connect your device to your robot base using a "USB on the go" cable. The device's main camera should have the same direction of the robot's front. Launch the application, and specify your PC's IP address to connect to the ROS master (you may optionally run the ROS master on the device directly; for this example we will assume that the ROS master is running on your computer). Then, run the visualizer:
 
 ```
-roslaunch navstack_tools turtlebot_demo_visualizer.launch
+roslaunch navigation_setup tangobot_demo_visualizer.launch
 ```
 
 You should now see the robot in the center of an empty map in RVIZ. You can now send goal poses from there to navigate.
@@ -58,5 +58,5 @@ rosrun dynamic_reconfigure dynparam set /tango publish_point_cloud [true/false]
 ### Running the navigation stack in your computer
 You may choose to run the navigation stack in your computer optionally. After following the steps described above, run the following command:
 ```
-roslaunch navstack_tools turtlebot_navigation_bringup.launch
+roslaunch navigation_setup tangobot_navigation_bringup.launch
 ```

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>navstack_tools</name>
+  <name>navigation_setup</name>
   <version>0.1.0</version>
-  <description>The navstack_tools package</description>
+  <description>A helper package to get navigation stacks up and running.</description>
 
   <maintainer email="jubeira@ekumenlabs.com">Juan Ignacio Ubeira</maintainer>
 
