@@ -100,7 +100,7 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
         });
 
     public MainActivity() {
-        super(APP_NAME, APP_NAME);
+        super(APP_NAME, APP_NAME, SettingsActivity.class, MASTER_CHOOSER_REQUEST_CODE);
         mNodeMainExecutorLatch = new CountDownLatch(1);
     }
 
