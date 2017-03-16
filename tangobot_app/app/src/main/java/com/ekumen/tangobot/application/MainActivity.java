@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Ekumen
+ * Copyright 2017 Ekumen, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,10 @@ import android.content.ServiceConnection;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Pair;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.widget.Toast;
 
 import com.ekumen.tangobot.loaders.KobukiNodeLoader;
@@ -36,7 +39,7 @@ import com.ekumen.tangobot.nodes.ParameterLoaderNode;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ros.android.RosActivity;
+import org.ros.android.AppCompatRosActivity;
 import org.ros.node.ConnectedNode;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
@@ -52,7 +55,7 @@ import eu.intermodalics.tango_ros_node.TangoInitializationHelper;
 import eu.intermodalics.tango_ros_node.TangoInitializationHelper.DefaultTangoServiceConnection.AfterConnectionCallback;
 import eu.intermodalics.tango_ros_node.TangoRosNode;
 
-public class MainActivity extends RosActivity implements TangoRosNode.CallbackListener {
+public class MainActivity extends AppCompatRosActivity implements TangoRosNode.CallbackListener {
     private static final String ACTION_USB_PERMISSION = "com.github.rosjava.android.androidp1.USB_PERMISSION";
     public final static String APP_NAME = "TangoBotApp";
 
@@ -116,6 +119,8 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
 
         // UI
         setContentView(R.layout.main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         // USB handling code
         mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
@@ -138,6 +143,13 @@ public class MainActivity extends RosActivity implements TangoRosNode.CallbackLi
                 onDeviceDetached(device);
             }
         };
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
     }
 
     @Override

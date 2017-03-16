@@ -9,6 +9,8 @@
     <string name="title_activity_settings">Settings</string>
 
     <!-- Strings related to Settings -->
+    <string name="pref_previously_started_key">pref_previously_started</string>
+    <string name="snackbar_text_restart">You will need to restart the app to apply these new settings.</string>
 
     <!-- Strings related to ROS Settings -->
     <string name="pref_category_ros_title">ROS</string>
