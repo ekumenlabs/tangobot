@@ -30,6 +30,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.ekumen.tangobot.loaders.KobukiNodeLoader;
@@ -363,6 +364,21 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         } else if (returnCode < TangoRosNode.SUCCESS) {
             mLog.error(getString(R.string.tango_service_error));
             displayToastMessage(R.string.tango_service_error);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        mLog.info("Option selected: " + item.getItemId());
+        switch (item.getItemId()) {
+            case R.id.settings:
+                mLog.info("starting settings activity");
+                Intent settingsActivityIntent = new Intent(this, SettingsActivity.class);
+                settingsActivityIntent.putExtra("master_connect", false);
+                startActivityForResult(settingsActivityIntent, 1);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 }

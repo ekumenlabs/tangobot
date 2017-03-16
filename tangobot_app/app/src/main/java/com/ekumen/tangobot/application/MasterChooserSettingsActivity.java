@@ -89,10 +89,18 @@ public abstract class MasterChooserSettingsActivity extends AppCompatPreferenceA
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mSharedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+
+        if (getIntent().getBooleanExtra("master_connect", true)) {
+            boolean previouslyStarted = mSharedPref.getBoolean(getString(R.string.pref_previously_started_key), false);
+            if (previouslyStarted) {
+                onBackPressed();
+            }
+        }
+
         setContentView(R.layout.settings_activity);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        mSharedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         mSharedPref.registerOnSharedPreferenceChangeListener(this);
         setupActionBar();
         mSettingsPreferenceFragment = new SettingsPreferenceFragment();
@@ -143,11 +151,22 @@ public abstract class MasterChooserSettingsActivity extends AppCompatPreferenceA
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent();
-        // This result and this extra is expected by the standard ROS Activity
-        String uri = mSharedPref.getString(getResources().getString(R.string.pref_master_uri_key), "");
-        intent.putExtra("ROS_MASTER_URI", uri);
-        setResult(RESULT_OK, intent);
+        boolean previouslyStarted = mSharedPref.getBoolean(getString(R.string.pref_previously_started_key), false);
+
+        if (!previouslyStarted) {
+            SharedPreferences.Editor edit = mSharedPref.edit();
+            edit.putBoolean(getString(R.string.pref_previously_started_key), Boolean.TRUE);
+            edit.commit();
+        }
+
+        // Try to connect to Master by default.
+        if (getIntent().getBooleanExtra("master_connect", true)) {
+            Intent intent = new Intent();
+            // This result and this extra is expected by the standard ROS Activity
+            String uri = mSharedPref.getString(getResources().getString(R.string.pref_master_uri_key), "");
+            intent.putExtra("ROS_MASTER_URI", uri);
+            setResult(RESULT_OK, intent);
+        }
         super.onBackPressed();
     }
 }

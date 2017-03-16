@@ -17,10 +17,6 @@ public class SettingsActivity extends MasterChooserSettingsActivity {
                 View snackBarView = snackbar.getView();
                 snackBarView.setBackgroundColor(getResources().getColor(android.R.color.holo_orange_dark));
                 snackbar.show();
-            } else if (!previouslyStarted) {
-                SharedPreferences.Editor edit = mSharedPref.edit();
-                edit.putBoolean(getString(R.string.pref_previously_started_key), Boolean.TRUE);
-                edit.commit();
             }
         }
     }
