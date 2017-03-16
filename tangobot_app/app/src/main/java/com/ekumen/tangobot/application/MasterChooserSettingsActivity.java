@@ -2,7 +2,6 @@ package com.ekumen.tangobot.application;
 
 
 import android.annotation.TargetApi;
-import android.app.ActionBar;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -13,9 +12,6 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -32,7 +28,6 @@ public abstract class MasterChooserSettingsActivity extends AppCompatPreferenceA
         SharedPreferences.OnSharedPreferenceChangeListener{
 
     protected SettingsPreferenceFragment mSettingsPreferenceFragment;
-    protected Log mLog;
     protected SharedPreferences mSharedPref;
 
     /**
@@ -91,34 +86,21 @@ public abstract class MasterChooserSettingsActivity extends AppCompatPreferenceA
         super.onCreate(savedInstanceState);
         mSharedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
-        if (getIntent().getBooleanExtra("master_connect", true)) {
-            boolean previouslyStarted = mSharedPref.getBoolean(getString(R.string.pref_previously_started_key), false);
-            if (previouslyStarted) {
-                onBackPressed();
-            }
+        // This activity requires a method to force its start when "show settings" is off.
+        boolean editSettings = getIntent().getBooleanExtra("edit_settings", false);
+        boolean showSettings = mSharedPref.getBoolean(getString(R.string.pref_show_settings_on_startup_key), true);
+        if (!showSettings && !editSettings) {
+            onBackPressed();
         }
 
         setContentView(R.layout.settings_activity);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mSharedPref.registerOnSharedPreferenceChangeListener(this);
-        setupActionBar();
         mSettingsPreferenceFragment = new SettingsPreferenceFragment();
         getFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, mSettingsPreferenceFragment)
                 .commit();
-        mLog = LogFactory.getLog(MasterChooserSettingsActivity.class);
-    }
-
-    /**
-     * Set up the {@link android.app.ActionBar}, if the API is available.
-     */
-    private void setupActionBar() {
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            // Show the Up button in the action bar.
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
     }
 
     /**
@@ -151,20 +133,19 @@ public abstract class MasterChooserSettingsActivity extends AppCompatPreferenceA
 
     @Override
     public void onBackPressed() {
-        boolean previouslyStarted = mSharedPref.getBoolean(getString(R.string.pref_previously_started_key), false);
-
-        if (!previouslyStarted) {
-            SharedPreferences.Editor edit = mSharedPref.edit();
-            edit.putBoolean(getString(R.string.pref_previously_started_key), Boolean.TRUE);
-            edit.commit();
-        }
-
         // Try to connect to Master by default.
-        if (getIntent().getBooleanExtra("master_connect", true)) {
+        boolean editSettings = getIntent().getBooleanExtra("edit_settings", false);
+        if (!editSettings) {
             Intent intent = new Intent();
-            // This result and this extra is expected by the standard ROS Activity
-            String uri = mSharedPref.getString(getResources().getString(R.string.pref_master_uri_key), "");
-            intent.putExtra("ROS_MASTER_URI", uri);
+            // This result and these extras are expected by the standard ROS Activity
+            if (mSharedPref.getBoolean(getString(R.string.pref_master_is_local_key), false)) {
+                intent.putExtra("ROS_MASTER_CREATE_NEW", true);
+                intent.putExtra("ROS_MASTER_PRIVATE", false);
+            } else {
+                String uri = mSharedPref.getString(getResources().getString(R.string.pref_master_uri_key), "");
+                intent.putExtra("ROS_MASTER_URI", uri);
+            }
+
             setResult(RESULT_OK, intent);
         }
         super.onBackPressed();

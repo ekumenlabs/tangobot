@@ -8,7 +8,6 @@ import android.view.View;
 public class SettingsActivity extends MasterChooserSettingsActivity {
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        mLog.info("Shared pref changed");
         if (key == getString(R.string.pref_master_is_local_key) ||
                 key == getString(R.string.pref_master_uri_key)) {
             boolean previouslyStarted = mSharedPref.getBoolean(getString(R.string.pref_previously_started_key), false);
