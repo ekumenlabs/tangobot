@@ -1,5 +1,20 @@
-package com.ekumen.tangobot.application;
+/*
+ * Copyright 2017 Ekumen, Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+package com.ekumen.tangobot.application;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
@@ -29,6 +44,7 @@ public abstract class MasterChooserSettingsActivity extends AppCompatPreferenceA
 
     protected SettingsPreferenceFragment mSettingsPreferenceFragment;
     protected SharedPreferences mSharedPref;
+    private static boolean masterConnectionAttempted;
 
     /**
      * A preference value change listener that updates the preference's summary
@@ -46,11 +62,7 @@ public abstract class MasterChooserSettingsActivity extends AppCompatPreferenceA
                 int index = listPreference.findIndexOfValue(stringValue);
 
                 // Set the summary to reflect the new value.
-                preference.setSummary(
-                        index >= 0
-                                ? listPreference.getEntries()[index]
-                                : null);
-
+                preference.setSummary(index >= 0 ? listPreference.getEntries()[index] : null);
             } else {
                 // For all other preferences, set the summary to the value's
                 // simple string representation.
@@ -86,21 +98,22 @@ public abstract class MasterChooserSettingsActivity extends AppCompatPreferenceA
         super.onCreate(savedInstanceState);
         mSharedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
-        // This activity requires a method to force its start when "show settings" is off.
-        boolean editSettings = getIntent().getBooleanExtra("edit_settings", false);
+        // This activity requires a method to force its start externally when "show settings" is off.
+        boolean forceShowSettings = getIntent().getBooleanExtra("user_forced_launch", false);
         boolean showSettings = mSharedPref.getBoolean(getString(R.string.pref_show_settings_on_startup_key), true);
-        if (!showSettings && !editSettings) {
+
+        if (forceShowSettings || showSettings) {
+            setContentView(R.layout.settings_activity);
+            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
+            mSharedPref.registerOnSharedPreferenceChangeListener(this);
+            mSettingsPreferenceFragment = new SettingsPreferenceFragment();
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, mSettingsPreferenceFragment)
+                    .commit();
+        } else {
             onBackPressed();
         }
-
-        setContentView(R.layout.settings_activity);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        mSharedPref.registerOnSharedPreferenceChangeListener(this);
-        mSettingsPreferenceFragment = new SettingsPreferenceFragment();
-        getFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, mSettingsPreferenceFragment)
-                .commit();
     }
 
     /**
@@ -133,21 +146,29 @@ public abstract class MasterChooserSettingsActivity extends AppCompatPreferenceA
 
     @Override
     public void onBackPressed() {
-        // Try to connect to Master by default.
-        boolean editSettings = getIntent().getBooleanExtra("edit_settings", false);
-        if (!editSettings) {
-            Intent intent = new Intent();
-            // This result and these extras are expected by the standard ROS Activity
-            if (mSharedPref.getBoolean(getString(R.string.pref_master_is_local_key), false)) {
-                intent.putExtra("ROS_MASTER_CREATE_NEW", true);
-                intent.putExtra("ROS_MASTER_PRIVATE", false);
-            } else {
-                String uri = mSharedPref.getString(getResources().getString(R.string.pref_master_uri_key), "");
-                intent.putExtra("ROS_MASTER_URI", uri);
-            }
-
-            setResult(RESULT_OK, intent);
+        // Try to connect to Master by default when this activity wasn't launched by a user.
+        boolean userForcedLaunch = getIntent().getBooleanExtra("user_forced_launch", false);
+        if (!userForcedLaunch) {
+            masterConnectionAttemptSetup();
         }
         super.onBackPressed();
+    }
+
+    private void masterConnectionAttemptSetup() {
+        Intent intent = new Intent();
+        // This result and these extras are expected by the standard ROS Activity
+        if (mSharedPref.getBoolean(getString(R.string.pref_master_is_local_key), false)) {
+            intent.putExtra("ROS_MASTER_CREATE_NEW", true);
+            intent.putExtra("ROS_MASTER_PRIVATE", false);
+        } else {
+            String uri = mSharedPref.getString(getResources().getString(R.string.pref_master_uri_key), "");
+            intent.putExtra("ROS_MASTER_URI", uri);
+        }
+        masterConnectionAttempted = true;
+        setResult(RESULT_OK, intent);
+    }
+
+    protected boolean masterConnectionWasAttempted() {
+        return masterConnectionAttempted;
     }
 }

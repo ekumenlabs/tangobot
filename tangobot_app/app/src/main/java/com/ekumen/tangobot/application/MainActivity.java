@@ -369,12 +369,10 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        mLog.info("Option selected: " + item.getItemId());
         switch (item.getItemId()) {
             case R.id.settings:
-                mLog.info("starting settings activity");
                 Intent settingsActivityIntent = new Intent(this, SettingsActivity.class);
-                settingsActivityIntent.putExtra("edit_settings", true);
+                settingsActivityIntent.putExtra("user_forced_launch", true);
                 startActivity(settingsActivityIntent);
                 return true;
             default:
