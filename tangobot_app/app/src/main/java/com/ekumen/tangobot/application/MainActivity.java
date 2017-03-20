@@ -173,16 +173,32 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
             manager.requestPermission(device, mUsbPermissionIntent);
         }
 
+        // Attempt a connection to ROS master
         CountDownLatch latch = new CountDownLatch(1);
-        startParameterLoaderNode(latch);
+        new MasterConnectionChecker(mMasterUri.toString(),
+                new MasterConnectionChecker.UserHook() {
+                    @Override
+                    public void onSuccess(Object o) {
+                        if (o != null) {
+                            ((CountDownLatch) o).countDown();
+                        }
+                        mLog.info("ROS OK");
+                        displayToastMessage(R.string.ros_init_ok);
+                    }
 
-        try {
-            mLog.info("Waiting for parameter latch release...");
-            latch.await();
-            mLog.info("Parameter latch released!");
-        } catch (InterruptedException ie) {
-            mLog.warn("Warning: continuing before parameter latch was released");
-        }
+                    @Override
+                    public void onError(Throwable t) {
+                        mLog.info("ROS init error");
+                        displayToastMessage(R.string.ros_init_error);
+                    }},
+                latch
+        ).runTest();
+        waitForLatchUnlock(latch, "ROS");
+
+        // Configure parameter server and wait until all parameters are set.
+        latch = new CountDownLatch(1);
+        startParameterLoaderNode(latch);
+        waitForLatchUnlock(latch, "parameter");
 
         startTangoRosNode();
         startMoveBaseNode();
@@ -377,6 +393,16 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void waitForLatchUnlock(CountDownLatch latch, String latchName) {
+        try {
+            mLog.info("Waiting for " + latchName + " latch release...");
+            latch.await();
+            mLog.info(latchName + " latch released!");
+        } catch (InterruptedException ie) {
+            mLog.warn("Warning: continuing before " + latchName + " latch was released");
         }
     }
 }
