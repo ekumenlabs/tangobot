@@ -23,9 +23,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.util.Pair;
@@ -33,6 +35,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ekumen.tangobot.loaders.KobukiNodeLoader;
@@ -107,6 +110,8 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
                 }
             }
         });
+    private TextView mUriTextView;
+    private SharedPreferences mSharedPref;
 
     public MainActivity() {
         super(APP_NAME, APP_NAME, SettingsActivity.class, MASTER_CHOOSER_REQUEST_CODE);
@@ -124,11 +129,10 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
                     getResources().openRawResource(ip.first.intValue()), ip.second));
         }
 
+        mSharedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+
         // UI
-        setContentView(R.layout.main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        mRosMasterConnection = new ModuleStatusIndicator(this, (ImageView) findViewById(R.id.is_ros_ok_image));
+        initializeUI();
 
         // USB handling code
         mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
@@ -173,6 +177,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         mHostName = getRosHostname();
 
         mLog.info(mMasterUri);
+        updateMasterUriUI(mMasterUri.toString());
 
         // Trigger asking permission to access any devices that are already connected
         UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
@@ -403,6 +408,27 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void initializeUI() {
+        setContentView(R.layout.main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        mRosMasterConnection = new ModuleStatusIndicator(this, (ImageView) findViewById(R.id.is_ros_ok_image));
+        String masterUri = mSharedPref.getString(getString(R.string.pref_master_uri_key),
+                getResources().getString(R.string.pref_master_uri_default));
+        mUriTextView = (TextView) findViewById(R.id.master_uri);
+        updateMasterUriUI(masterUri);
+    }
+
+    private void updateMasterUriUI(final String masterUri) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mUriTextView.setText(masterUri);
+
+            }
+        });
     }
 
     private void waitForLatchUnlock(CountDownLatch latch, String latchName) {
