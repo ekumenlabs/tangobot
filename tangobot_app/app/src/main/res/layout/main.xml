@@ -46,8 +46,8 @@
                 android:id="@+id/is_ros_ok_image"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/is_ros_ok_text"
                 android:layout_alignTop="@+id/is_ros_ok_text"
-                android:layout_alignLeft="@+id/master_uri"
                 android:src="@drawable/ic_cancel_black_24dp"
                 android:tint="@android:color/holo_red_dark"/>
         </RelativeLayout>

@@ -17,16 +17,26 @@
 package com.ekumen.tangobot.application;
 
 import android.app.Activity;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.StyleableRes;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.widget.ImageView;
 
-public class ModuleStatus {
+/**
+ * This class binds an {@link ImageView} to a {@link ModuleStatusIndicator}, allowing to change
+ * it visual appearance according to its respective state (Running, Waiting, or Error).
+ * It depends on indicators.xml, which specifies arrays with the image/ color to use in each case.
+ */
+public class ModuleStatusIndicator {
     protected Activity activity;
     protected ImageView imageView;
     protected Status status;
 
-    ModuleStatus(Activity activity, ImageView view) {
+    private static final int RESOURCE_INDEX = 0;
+    @StyleableRes private static final int COLOR_INDEX = 1;
+
+    ModuleStatusIndicator(Activity activity, ImageView view) {
         this.activity = activity;
         this.imageView = view;
         this.status = Status.WAITING_FOR_START;
@@ -40,37 +50,37 @@ public class ModuleStatus {
         }
     }
 
+    /**
+     * Look for the resource according to the case and apply it with its respective color.
+     * Note: This function does not perform any checks as assumes the xml file is correct.
+     * It should have one array for each state, and each array should have a drawable resource and a color resource (in that order).
+     */
     private void switchStatusDisplay() {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                int tintColor = 0;
-                Drawable drawable = null;
+                TypedArray img = null;
 
                 switch (status) {
                     case RUNNING:
-                        drawable = activity.getResources().getDrawable(R.drawable.ic_check_circle_black_24dp);
-                        tintColor = activity.getResources().getColor(android.R.color.holo_green_dark);
+                        img = activity.getResources().obtainTypedArray(R.array.status_running);
                         break;
 
                     case WAITING_FOR_START:
-                        drawable = activity.getResources().getDrawable(R.drawable.ic_hourglass_empty_black_24dp);
-                        tintColor = activity.getResources().getColor(android.R.color.holo_orange_dark);
+                        img = activity.getResources().obtainTypedArray(R.array.status_waiting);
                         break;
 
                     case ERROR:
-                        drawable = activity.getResources().getDrawable(R.drawable.ic_cancel_black_24dp);
-                        tintColor = activity.getResources().getColor(android.R.color.holo_red_dark);
+                        img = activity.getResources().obtainTypedArray(R.array.status_error);
                         break;
+                }
 
-                    default:
-                        break;
-                }
-                if (drawable != null) {
-                    imageView.setImageDrawable(drawable);
-                    drawable = DrawableCompat.wrap(imageView.getDrawable().mutate());
-                    DrawableCompat.setTint(drawable, tintColor);
-                }
+                int color = img.getColor(COLOR_INDEX, activity.getResources().getColor(android.R.color.black));
+                Drawable drawable = img.getDrawable(RESOURCE_INDEX);
+                imageView.setImageDrawable(drawable);
+                drawable = DrawableCompat.wrap(imageView.getDrawable().mutate());
+                DrawableCompat.setTint(drawable, color);
+                img.recycle();
             }
         });
     }

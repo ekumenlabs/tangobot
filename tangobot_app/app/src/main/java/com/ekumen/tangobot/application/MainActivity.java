@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
     private ParameterLoaderNode mParameterLoaderNode;
 
     // Status
-    ModuleStatus mRosMasterConnection;
+    ModuleStatusIndicator mRosMasterConnection;
 
     private static ArrayList<Pair<Integer, String>> mResourcesToLoad = new ArrayList<Pair<Integer, String>>() {{
         add(new Pair<>(R.raw.costmap_common_params, MoveBaseNode.NODE_NAME + "/local_costmap"));
@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         setContentView(R.layout.main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        mRosMasterConnection = new ModuleStatus(this, (ImageView) findViewById(R.id.is_ros_ok_image));
+        mRosMasterConnection = new ModuleStatusIndicator(this, (ImageView) findViewById(R.id.is_ros_ok_image));
 
         // USB handling code
         mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
@@ -190,14 +190,14 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
                             ((CountDownLatch) o).countDown();
                         }
                         mLog.info("ROS OK");
-                        mRosMasterConnection.updateStatus(ModuleStatus.Status.RUNNING);
+                        mRosMasterConnection.updateStatus(ModuleStatusIndicator.Status.RUNNING);
                         displayToastMessage(R.string.ros_init_ok);
                     }
 
                     @Override
                     public void onError(Throwable t) {
                         mLog.info("ROS init error");
-                        mRosMasterConnection.updateStatus(ModuleStatus.Status.ERROR);
+                        mRosMasterConnection.updateStatus(ModuleStatusIndicator.Status.ERROR);
                         displayToastMessage(R.string.ros_init_error);
                     }},
                 latch
