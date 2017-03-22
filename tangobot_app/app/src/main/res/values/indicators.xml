@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="status_error">
+        <item>@drawable/ic_cancel_black_24dp</item>
+        <item>@android:color/holo_red_dark</item>
+    </array>
+    <array name="status_waiting">
+        <item>@drawable/ic_hourglass_empty_black_24dp</item>
+        <item>@android:color/holo_orange_dark</item>
+    </array>
+    <array name="status_running">
+        <item>@drawable/ic_check_circle_black_24dp</item>
+        <item>@android:color/holo_green_dark</item>
+    </array>
+</resources>

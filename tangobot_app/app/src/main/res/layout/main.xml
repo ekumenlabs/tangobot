@@ -8,7 +8,53 @@
 
     <TextView
     android:layout_width="fill_parent" 
-    android:layout_height="wrap_content" 
-    android:text="Welcome to Tangobot application!" />
+    android:layout_height="wrap_content" />
+
+    <FrameLayout
+        android:id="@+id/content_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/master_uri_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Master URI: "
+                android:textSize="20sp"
+                android:textAlignment="viewStart"
+                android:gravity="start"
+                android:layout_marginLeft="5sp" />
+
+            <TextView
+                android:id="@+id/master_uri"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/master_uri_text"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/is_ros_ok_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/master_uri_text"
+                android:text="ROS "
+                android:textSize="20sp"
+                android:layout_alignLeft="@+id/master_uri_text" />
+
+            <ImageView
+                android:id="@+id/is_ros_ok_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/is_ros_ok_text"
+                android:layout_alignTop="@+id/is_ros_ok_text"
+                android:src="@drawable/ic_cancel_black_24dp"
+                android:tint="@android:color/holo_red_dark"/>
+        </RelativeLayout>
+    </FrameLayout>
+
 </LinearLayout>
 
