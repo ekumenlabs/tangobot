@@ -34,16 +34,10 @@ public class MasterConnectionChecker {
 
     private Object onSuccessPayload;
 
-    /**
-     * Lookup text for catching a ConnectionException when attempting to
-     * connect to a master.
-     */
+    // Lookup text for catching a ConnectionException when attempting to connect to a master.
     private static final String CONNECTION_EXCEPTION_TEXT = "ECONNREFUSED";
 
-    /**
-     * Lookup text for catching a UnknownHostException when attemping to
-     * connect to a master.
-     */
+    // Lookup text for catching a UnknownHostException when attemping to connect to a master.
     private static final String UNKNOW_HOST_TEXT = "UnknownHost";
 
     public MasterConnectionChecker(String uri, UserHook hook) {

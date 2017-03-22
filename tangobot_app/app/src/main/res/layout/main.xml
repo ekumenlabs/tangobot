@@ -56,7 +56,6 @@
                     android:layout_height="wrap_content"
                     android:layout_alignTop="@+id/is_ros_ok_text"
                     android:src="@drawable/ic_highlight_off_black_24dp"
-                    android:tint="@android:color/holo_red_dark"
                     android:layout_alignParentEnd="false"
                     android:layout_alignParentBottom="false"
                     android:layout_alignParentLeft="false"

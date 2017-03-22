@@ -225,6 +225,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         startParameterLoaderNode(latch);
         waitForLatchUnlock(latch, "parameter");
 
+        // Start Tango node and navigation stack.
         startTangoRosNode();
         startMoveBaseNode();
     }
@@ -408,8 +409,9 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
             displayToastMessage(R.string.tango_lib_error);
         }
     }
+
     /**
-     * Display a toast message with the given message.
+     * Helper method to display a toast message with the given message.
      * @param messageId String id of the message to display.
      */
     private void displayToastMessage(final int messageId) {
@@ -457,6 +459,10 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         }
     }
 
+    /**
+     * Helper method to configure UI elements in the activity (status indicators, Master URI, toolbar).
+     * This method shall be called in {@link #onCreate(Bundle)}.
+     */
     private void initializeUI() {
         setContentView(R.layout.main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -471,16 +477,24 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         updateMasterUriUI(masterUri);
     }
 
+    /**
+     * Helper method to update the Master URI field in the UI.
+     * @param masterUri URI to display.
+     */
     private void updateMasterUriUI(final String masterUri) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 mUriTextView.setText(masterUri);
-
             }
         });
     }
 
+    /**
+     * Helper method to block the calling thread until the latch is zeroed by some other task.
+     * @param latch Latch to wait for.
+     * @param latchName Name to be used in log messages for the given latch.
+     */
     private void waitForLatchUnlock(CountDownLatch latch, String latchName) {
         try {
             mLog.info("Waiting for " + latchName + " latch release...");
