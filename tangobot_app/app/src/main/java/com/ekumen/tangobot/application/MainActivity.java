@@ -83,6 +83,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
 
     // Status
     ModuleStatusIndicator mRosMasterConnection;
+    ModuleStatusIndicator mTangoService;
 
     private static ArrayList<Pair<Integer, String>> mResourcesToLoad = new ArrayList<Pair<Integer, String>>() {{
         add(new Pair<>(R.raw.costmap_common_params, MoveBaseNode.NODE_NAME + "/local_costmap"));
@@ -102,8 +103,10 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
             @Override
             public void execute() {
                 if (TangoInitializationHelper.isTangoServiceBound()) {
+                    mTangoService.updateStatus(ModuleStatusIndicator.Status.RUNNING);
                     mLog.info("Bound to Tango Service");
                 } else {
+                    mTangoService.updateStatus(ModuleStatusIndicator.Status.ERROR);
                     mLog.error(getString(R.string.tango_bind_error));
                     displayToastMessage(R.string.tango_bind_error);
                     onDestroy();
@@ -186,6 +189,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         }
 
         // Attempt a connection to ROS master
+        mRosMasterConnection.updateStatus(ModuleStatusIndicator.Status.LOADING);
         CountDownLatch latch = new CountDownLatch(1);
         new MasterConnectionChecker(mMasterUri.toString(),
                 new MasterConnectionChecker.UserHook() {
@@ -340,6 +344,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
     }
 
     public void startTangoRosNode() {
+        mTangoService.updateStatus(ModuleStatusIndicator.Status.LOADING);
         NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
         nodeConfiguration.setMasterUri(mMasterUri);
         nodeConfiguration.setNodeName("TangoRosNode");
@@ -355,10 +360,12 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
                 mNodeMainExecutor.execute(mTangoRosNode, nodeConfiguration);
             } else {
                 mLog.error(getString(R.string.tango_version_error));
+                mTangoService.updateStatus(ModuleStatusIndicator.Status.ERROR);
                 displayToastMessage(R.string.tango_version_error);
             }
         } else {
             mLog.error(getString(R.string.tango_lib_error));
+            mTangoService.updateStatus(ModuleStatusIndicator.Status.ERROR);
             displayToastMessage(R.string.tango_lib_error);
         }
     }
@@ -415,6 +422,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mRosMasterConnection = new ModuleStatusIndicator(this, (ImageView) findViewById(R.id.is_ros_ok_image));
+        mTangoService = new ModuleStatusIndicator(this, (ImageView) findViewById(R.id.is_tango_ok_image));
         String masterUri = mSharedPref.getString(getString(R.string.pref_master_uri_key),
                 getResources().getString(R.string.pref_master_uri_default));
         mUriTextView = (TextView) findViewById(R.id.master_uri);

@@ -49,10 +49,29 @@
                 android:id="@+id/is_ros_ok_image"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/is_ros_ok_text"
+                android:layout_alignStart="@+id/is_tango_ok_image"
                 android:layout_alignTop="@+id/is_ros_ok_text"
-                android:src="@drawable/ic_cancel_black_24dp"
+                android:src="@drawable/ic_highlight_off_black_24dp"
                 android:tint="@android:color/holo_red_dark"/>
+
+            <TextView
+                android:id="@+id/is_tango_ok_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/is_ros_ok_text"
+                android:text="Tango "
+                android:textSize="20sp"
+                android:layout_alignLeft="@+id/master_uri_text" />
+
+            <ImageView
+                android:id="@+id/is_tango_ok_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/is_tango_ok_text"
+                android:layout_toRightOf="@+id/is_tango_ok_text"
+                android:src="@drawable/ic_highlight_off_black_24dp"
+                android:tint="@android:color/holo_red_dark"/>
+
         </RelativeLayout>
     </FrameLayout>
 

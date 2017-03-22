@@ -39,7 +39,7 @@ public class ModuleStatusIndicator {
     ModuleStatusIndicator(Activity activity, ImageView view) {
         this.activity = activity;
         this.imageView = view;
-        this.status = Status.WAITING_FOR_START;
+        this.status = Status.PAUSED;
         switchStatusDisplay();
     }
 
@@ -62,12 +62,16 @@ public class ModuleStatusIndicator {
                 TypedArray img = null;
 
                 switch (status) {
+                    case PAUSED:
+                        img = activity.getResources().obtainTypedArray(R.array.status_paused);
+                        break;
+
                     case RUNNING:
                         img = activity.getResources().obtainTypedArray(R.array.status_running);
                         break;
 
-                    case WAITING_FOR_START:
-                        img = activity.getResources().obtainTypedArray(R.array.status_waiting);
+                    case LOADING:
+                        img = activity.getResources().obtainTypedArray(R.array.status_loading);
                         break;
 
                     case ERROR:
@@ -87,7 +91,8 @@ public class ModuleStatusIndicator {
 
     enum Status {
         ERROR,
-        WAITING_FOR_START,
+        PAUSED,
+        LOADING,
         RUNNING
     }
 }
