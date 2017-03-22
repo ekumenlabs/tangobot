@@ -17,6 +17,7 @@
 package com.ekumen.tangobot.nodes;
 
 import org.ros.node.ConnectedNode;
+import org.ros.node.Node;
 
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
@@ -26,22 +27,64 @@ import java.util.concurrent.CountDownLatch;
 
 public class ParameterLoaderNode extends org.ros.helpers.ParameterLoaderNode {
     private CountDownLatch latch;
+    private UserHook userHook;
+    private Object onSuccessPayload;
 
     /**
-     * Latched constructor
+     * Default constructor
      * @param resources Array of resources with their respective namespace to load.
-     * @param latch Latch to decrement after loading all parameters to sync with other threads.
      */
-    public ParameterLoaderNode(ArrayList<Resource> resources, CountDownLatch latch) {
+    public ParameterLoaderNode(ArrayList<Resource> resources) {
+        this(resources, null, null);
+    }
+
+    /**
+     * User-hook constructor
+     * Sets user callbacks to perform actions on error or on success.
+     * @param resources Array of resources with their respective namespace to load.
+     * @param hook Object that defines onError and onSuccess callbacks.
+     * @param onSuccessPayload Object to send as a parameter to onSuccess callback defined by hook.
+     */
+    public ParameterLoaderNode(ArrayList<Resource> resources, UserHook hook, Object onSuccessPayload) {
         super(resources);
-        this.latch = latch;
+        // Set dummy hook if received a null one
+        if (hook == null) {
+            userHook = new UserHook() {
+                @Override
+                public void onSuccess(Object o) {}
+                @Override
+                public void onError(Throwable t) {}
+            };
+        } else {
+            userHook = hook;
+        }
+
+        this.onSuccessPayload = onSuccessPayload;
     }
 
     @Override
     public void onStart(ConnectedNode connectedNode) {
-        super.onStart(connectedNode);
-        if (latch != null) {
-            latch.countDown();
+        try {
+            super.onStart(connectedNode);
+        } catch (Exception e) {
+            userHook.onError(e);
         }
+    }
+
+    @Override
+    public void onShutdownComplete(Node node) {
+        super.onShutdownComplete(node);
+        userHook.onSuccess(onSuccessPayload);
+    }
+
+    @Override
+    public void onError(Node node, Throwable throwable) {
+        super.onError(node, throwable);
+        userHook.onError(throwable);
+    }
+
+    public interface UserHook {
+        void onSuccess(Object o);
+        void onError(Throwable t);
     }
 }

@@ -115,6 +115,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         });
     private TextView mUriTextView;
     private SharedPreferences mSharedPref;
+    private ModuleStatusIndicator mParameterConfiguration;
 
     public MainActivity() {
         super(APP_NAME, APP_NAME, SettingsActivity.class, MASTER_CHOOSER_REQUEST_CODE);
@@ -225,10 +226,28 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
     private void startParameterLoaderNode(CountDownLatch latch) {
         // Create node to load configuration to Parameter Server
         mLog.info("Setting parameters in Parameter Server");
+        mParameterConfiguration.updateStatus(ModuleStatusIndicator.Status.LOADING);
         NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
         nodeConfiguration.setMasterUri(mMasterUri);
         nodeConfiguration.setNodeName(ParameterLoaderNode.NODE_NAME);
-        mParameterLoaderNode = new ParameterLoaderNode(mOpenedResources, latch);
+        mParameterLoaderNode = new ParameterLoaderNode(mOpenedResources,
+                new ParameterLoaderNode.UserHook() {
+                    @Override
+                    public void onSuccess(Object o) {
+                        if (o != null) {
+                            CountDownLatch latch = (CountDownLatch) o;
+                            latch.countDown();
+                        }
+                        mParameterConfiguration.updateStatus(ModuleStatusIndicator.Status.RUNNING);
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        mLog.error(t.getMessage());
+                        mParameterConfiguration.updateStatus(ModuleStatusIndicator.Status.ERROR);
+                    }
+                },
+                latch);
         mNodeMainExecutor.execute(mParameterLoaderNode, nodeConfiguration);
     }
 
@@ -401,6 +420,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         } else if (returnCode < TangoRosNode.SUCCESS) {
             mLog.error(getString(R.string.tango_service_error));
             displayToastMessage(R.string.tango_service_error);
+            mTangoService.updateStatus(ModuleStatusIndicator.Status.ERROR);
         }
     }
 
@@ -423,6 +443,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         setSupportActionBar(toolbar);
         mRosMasterConnection = new ModuleStatusIndicator(this, (ImageView) findViewById(R.id.is_ros_ok_image));
         mTangoService = new ModuleStatusIndicator(this, (ImageView) findViewById(R.id.is_tango_ok_image));
+        mParameterConfiguration = new ModuleStatusIndicator(this, (ImageView) findViewById(R.id.is_config_ok_image));
         String masterUri = mSharedPref.getString(getString(R.string.pref_master_uri_key),
                 getResources().getString(R.string.pref_master_uri_default));
         mUriTextView = (TextView) findViewById(R.id.master_uri);
