@@ -20,13 +20,11 @@ import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 
 import java.util.ArrayList;
-import java.util.concurrent.CountDownLatch;
 
 // Note: this extension can be incorporated to the rosjava_core ParameterLoaderNode;
 // in that case this file shall be removed from this project.
 
 public class ParameterLoaderNode extends org.ros.helpers.ParameterLoaderNode {
-    private CountDownLatch latch;
     private UserHook userHook;
     private Object onSuccessPayload;
 

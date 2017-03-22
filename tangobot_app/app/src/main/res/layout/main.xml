@@ -69,7 +69,6 @@
                     android:layout_below="@+id/is_ros_ok_text"
                     android:text="Configuration "
                     android:textSize="20sp"
-                    android:layout_alignLeft="@+id/master_uri_text"
                     android:layout_alignParentLeft="true" />
 
                 <ImageView
@@ -78,7 +77,6 @@
                     android:layout_height="wrap_content"
                     android:layout_alignTop="@+id/is_config_ok_text"
                     android:src="@drawable/ic_highlight_off_black_24dp"
-                    android:tint="@android:color/holo_red_dark"
                     android:layout_marginLeft="10dp"
                     android:layout_alignParentEnd="false"
                     android:layout_alignParentRight="true" />
@@ -90,7 +88,6 @@
                     android:layout_below="@+id/is_config_ok_text"
                     android:text="Tango "
                     android:textSize="20sp"
-                    android:layout_alignLeft="@+id/master_uri_text"
                     android:layout_alignParentLeft="true" />
 
                 <ImageView
@@ -99,7 +96,26 @@
                     android:layout_height="wrap_content"
                     android:layout_alignTop="@+id/is_tango_ok_text"
                     android:src="@drawable/ic_highlight_off_black_24dp"
-                    android:tint="@android:color/holo_red_dark"
+                    android:layout_centerVertical="false"
+                    android:layout_centerHorizontal="false"
+                    android:layout_alignParentTop="false"
+                    android:layout_alignParentRight="true" />
+
+                <TextView
+                    android:id="@+id/is_navigation_ok_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/is_tango_ok_text"
+                    android:text="Navigation "
+                    android:textSize="20sp"
+                    android:layout_alignParentLeft="true" />
+
+                <ImageView
+                    android:id="@+id/is_navigation_ok_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@+id/is_navigation_ok_text"
+                    android:src="@drawable/ic_highlight_off_black_24dp"
                     android:layout_centerVertical="false"
                     android:layout_centerHorizontal="false"
                     android:layout_alignParentTop="false"

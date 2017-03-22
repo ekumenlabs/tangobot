@@ -66,7 +66,7 @@ public class ModuleStatusIndicator {
                         img = activity.getResources().obtainTypedArray(R.array.status_paused);
                         break;
 
-                    case RUNNING:
+                    case OK:
                         img = activity.getResources().obtainTypedArray(R.array.status_running);
                         break;
 
@@ -93,6 +93,6 @@ public class ModuleStatusIndicator {
         ERROR,
         PAUSED,
         LOADING,
-        RUNNING
+        OK
     }
 }

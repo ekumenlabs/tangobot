@@ -67,8 +67,13 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
 
     private Log mLog = LogFactory.getLog(MainActivity.class);
     private NodeMainExecutor mNodeMainExecutor = null;
+    private TextView mUriTextView;
+
+    // Preferences & settings
+    private SharedPreferences mSharedPref;
     private URI mMasterUri;
     private String mHostName;
+
     // USB
     private UsbManager mUsbManager;
     private BroadcastReceiver mUsbAttachedReceiver;
@@ -76,15 +81,19 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
     private PendingIntent mUsbPermissionIntent;
     private Map<UsbDevice, NodeMain[]> mUsbNodes = new HashMap<UsbDevice, NodeMain[]>();
 
+    // Nodes
     private CountDownLatch mNodeMainExecutorLatch;
     private TangoRosNode mTangoRosNode;
     private MoveBaseNode mMoveBaseNode;
     private ParameterLoaderNode mParameterLoaderNode;
 
     // Status
-    ModuleStatusIndicator mRosMasterConnection;
-    ModuleStatusIndicator mTangoService;
+    private ModuleStatusIndicator mRosMasterConnection;
+    private ModuleStatusIndicator mTangoService;
+    private ModuleStatusIndicator mParameterConfiguration;
+    private ModuleStatusIndicator mMoveBaseStatus;
 
+    // Resources
     private static ArrayList<Pair<Integer, String>> mResourcesToLoad = new ArrayList<Pair<Integer, String>>() {{
         add(new Pair<>(R.raw.costmap_common_params, MoveBaseNode.NODE_NAME + "/local_costmap"));
         add(new Pair<>(R.raw.costmap_common_params, MoveBaseNode.NODE_NAME + "/global_costmap"));
@@ -103,7 +112,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
             @Override
             public void execute() {
                 if (TangoInitializationHelper.isTangoServiceBound()) {
-                    mTangoService.updateStatus(ModuleStatusIndicator.Status.RUNNING);
+                    mTangoService.updateStatus(ModuleStatusIndicator.Status.OK);
                     mLog.info("Bound to Tango Service");
                 } else {
                     mTangoService.updateStatus(ModuleStatusIndicator.Status.ERROR);
@@ -113,9 +122,6 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
                 }
             }
         });
-    private TextView mUriTextView;
-    private SharedPreferences mSharedPref;
-    private ModuleStatusIndicator mParameterConfiguration;
 
     public MainActivity() {
         super(APP_NAME, APP_NAME, SettingsActivity.class, MASTER_CHOOSER_REQUEST_CODE);
@@ -200,7 +206,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
                             ((CountDownLatch) o).countDown();
                         }
                         mLog.info("ROS OK");
-                        mRosMasterConnection.updateStatus(ModuleStatusIndicator.Status.RUNNING);
+                        mRosMasterConnection.updateStatus(ModuleStatusIndicator.Status.OK);
                         displayToastMessage(R.string.ros_init_ok);
                     }
 
@@ -238,7 +244,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
                             CountDownLatch latch = (CountDownLatch) o;
                             latch.countDown();
                         }
-                        mParameterConfiguration.updateStatus(ModuleStatusIndicator.Status.RUNNING);
+                        mParameterConfiguration.updateStatus(ModuleStatusIndicator.Status.OK);
                     }
 
                     @Override
@@ -254,10 +260,24 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
     private void startMoveBaseNode() {
         // Create ROS node for base move
         mLog.info("Starting move base native node");
+        mMoveBaseStatus.updateStatus(ModuleStatusIndicator.Status.LOADING);
         NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
         nodeConfiguration.setMasterUri(mMasterUri);
         nodeConfiguration.setNodeName(MoveBaseNode.NODE_NAME);
-        mMoveBaseNode = new MoveBaseNode();
+        mMoveBaseNode = new MoveBaseNode(
+                new MoveBaseNode.UserHook() {
+                    @Override
+                    public void onPreExecute(Object o) {
+                        mMoveBaseStatus.updateStatus(ModuleStatusIndicator.Status.OK);
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        mMoveBaseStatus.updateStatus(ModuleStatusIndicator.Status.ERROR);
+                    }
+                },
+                null
+        );
         mNodeMainExecutor.execute(mMoveBaseNode, nodeConfiguration);
     }
 
@@ -444,6 +464,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         mRosMasterConnection = new ModuleStatusIndicator(this, (ImageView) findViewById(R.id.is_ros_ok_image));
         mTangoService = new ModuleStatusIndicator(this, (ImageView) findViewById(R.id.is_tango_ok_image));
         mParameterConfiguration = new ModuleStatusIndicator(this, (ImageView) findViewById(R.id.is_config_ok_image));
+        mMoveBaseStatus = new ModuleStatusIndicator(this, (ImageView) findViewById(R.id.is_navigation_ok_image));
         String masterUri = mSharedPref.getString(getString(R.string.pref_master_uri_key),
                 getResources().getString(R.string.pref_master_uri_default));
         mUriTextView = (TextView) findViewById(R.id.master_uri);
