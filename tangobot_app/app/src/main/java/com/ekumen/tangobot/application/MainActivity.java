@@ -41,13 +41,16 @@ import android.widget.Toast;
 import com.ekumen.tangobot.loaders.KobukiNodeLoader;
 import com.ekumen.tangobot.loaders.UsbDeviceNodeLoader;
 import com.ekumen.tangobot.nodes.MoveBaseNode;
-import com.ekumen.tangobot.nodes.ParameterLoaderNode;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.android.AppCompatRosActivity;
+import org.ros.helpers.ParameterLoaderNode;
 import org.ros.node.ConnectedNode;
+import org.ros.node.DefaultNodeListener;
+import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeListener;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
 
@@ -67,8 +70,13 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
 
     private Log mLog = LogFactory.getLog(MainActivity.class);
     private NodeMainExecutor mNodeMainExecutor = null;
+    private TextView mUriTextView;
+
+    // Preferences & settings
+    private SharedPreferences mSharedPref;
     private URI mMasterUri;
     private String mHostName;
+
     // USB
     private UsbManager mUsbManager;
     private BroadcastReceiver mUsbAttachedReceiver;
@@ -76,14 +84,19 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
     private PendingIntent mUsbPermissionIntent;
     private Map<UsbDevice, NodeMain[]> mUsbNodes = new HashMap<UsbDevice, NodeMain[]>();
 
+    // Nodes
     private CountDownLatch mNodeMainExecutorLatch;
     private TangoRosNode mTangoRosNode;
     private MoveBaseNode mMoveBaseNode;
     private ParameterLoaderNode mParameterLoaderNode;
 
     // Status
-    ModuleStatusIndicator mRosMasterConnection;
+    private ModuleStatusIndicator mRosMasterConnection;
+    private ModuleStatusIndicator mTangoService;
+    private ModuleStatusIndicator mParameterConfiguration;
+    private ModuleStatusIndicator mMoveBaseStatus;
 
+    // Resources
     private static ArrayList<Pair<Integer, String>> mResourcesToLoad = new ArrayList<Pair<Integer, String>>() {{
         add(new Pair<>(R.raw.costmap_common_params, MoveBaseNode.NODE_NAME + "/local_costmap"));
         add(new Pair<>(R.raw.costmap_common_params, MoveBaseNode.NODE_NAME + "/global_costmap"));
@@ -102,16 +115,16 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
             @Override
             public void execute() {
                 if (TangoInitializationHelper.isTangoServiceBound()) {
+                    mTangoService.updateStatus(ModuleStatusIndicator.Status.OK);
                     mLog.info("Bound to Tango Service");
                 } else {
+                    mTangoService.updateStatus(ModuleStatusIndicator.Status.ERROR);
                     mLog.error(getString(R.string.tango_bind_error));
                     displayToastMessage(R.string.tango_bind_error);
                     onDestroy();
                 }
             }
         });
-    private TextView mUriTextView;
-    private SharedPreferences mSharedPref;
 
     public MainActivity() {
         super(APP_NAME, APP_NAME, SettingsActivity.class, MASTER_CHOOSER_REQUEST_CODE);
@@ -186,6 +199,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         }
 
         // Attempt a connection to ROS master
+        mRosMasterConnection.updateStatus(ModuleStatusIndicator.Status.LOADING);
         CountDownLatch latch = new CountDownLatch(1);
         new MasterConnectionChecker(mMasterUri.toString(),
                 new MasterConnectionChecker.UserHook() {
@@ -195,7 +209,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
                             ((CountDownLatch) o).countDown();
                         }
                         mLog.info("ROS OK");
-                        mRosMasterConnection.updateStatus(ModuleStatusIndicator.Status.RUNNING);
+                        mRosMasterConnection.updateStatus(ModuleStatusIndicator.Status.OK);
                         displayToastMessage(R.string.ros_init_ok);
                     }
 
@@ -214,32 +228,59 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         startParameterLoaderNode(latch);
         waitForLatchUnlock(latch, "parameter");
 
+        // Start Tango node and navigation stack.
         startTangoRosNode();
         startMoveBaseNode();
     }
 
-    private void startParameterLoaderNode(CountDownLatch latch) {
+    private void startParameterLoaderNode(final CountDownLatch latch) {
         // Create node to load configuration to Parameter Server
         mLog.info("Setting parameters in Parameter Server");
+        mParameterConfiguration.updateStatus(ModuleStatusIndicator.Status.LOADING);
         NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
         nodeConfiguration.setMasterUri(mMasterUri);
         nodeConfiguration.setNodeName(ParameterLoaderNode.NODE_NAME);
-        mParameterLoaderNode = new ParameterLoaderNode(mOpenedResources, latch);
-        mNodeMainExecutor.execute(mParameterLoaderNode, nodeConfiguration);
+        mParameterLoaderNode = new ParameterLoaderNode(mOpenedResources);
+        mNodeMainExecutor.execute(mParameterLoaderNode, nodeConfiguration,
+                new ArrayList<NodeListener>() {{
+                    add(new DefaultNodeListener() {
+                        @Override
+                        public void onShutdown(Node node) {
+                            latch.countDown();
+                            mParameterConfiguration.updateStatus(ModuleStatusIndicator.Status.OK);
+                        }
+
+                        @Override
+                        public void onError(Node node, Throwable throwable) {
+                            mLog.error("Error loading parameters to ROS parameter server: " + throwable.getMessage(), throwable);
+                            mParameterConfiguration.updateStatus(ModuleStatusIndicator.Status.ERROR);
+                        }
+                    });
+                }});
     }
 
     private void startMoveBaseNode() {
         // Create ROS node for base move
         mLog.info("Starting move base native node");
+        mMoveBaseStatus.updateStatus(ModuleStatusIndicator.Status.LOADING);
         NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
         nodeConfiguration.setMasterUri(mMasterUri);
         nodeConfiguration.setNodeName(MoveBaseNode.NODE_NAME);
         mMoveBaseNode = new MoveBaseNode();
-        mNodeMainExecutor.execute(mMoveBaseNode, nodeConfiguration);
-    }
+        mNodeMainExecutor.execute(mMoveBaseNode, nodeConfiguration,
+                new ArrayList<NodeListener>(){{
+                    add(new DefaultNodeListener() {
+                        @Override
+                        public void onStart(ConnectedNode connectedNode) {
+                            mMoveBaseStatus.updateStatus(ModuleStatusIndicator.Status.OK);
+                        }
 
-    public void onStart(final ConnectedNode connectedNode) {
-
+                        @Override
+                        public void onError(Node node, Throwable throwable) {
+                            mMoveBaseStatus.updateStatus(ModuleStatusIndicator.Status.ERROR);
+                        }
+                    });
+                }});
     }
 
     @Override
@@ -340,6 +381,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
     }
 
     public void startTangoRosNode() {
+        mTangoService.updateStatus(ModuleStatusIndicator.Status.LOADING);
         NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
         nodeConfiguration.setMasterUri(mMasterUri);
         nodeConfiguration.setNodeName("TangoRosNode");
@@ -355,15 +397,18 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
                 mNodeMainExecutor.execute(mTangoRosNode, nodeConfiguration);
             } else {
                 mLog.error(getString(R.string.tango_version_error));
+                mTangoService.updateStatus(ModuleStatusIndicator.Status.ERROR);
                 displayToastMessage(R.string.tango_version_error);
             }
         } else {
             mLog.error(getString(R.string.tango_lib_error));
+            mTangoService.updateStatus(ModuleStatusIndicator.Status.ERROR);
             displayToastMessage(R.string.tango_lib_error);
         }
     }
+
     /**
-     * Display a toast message with the given message.
+     * Helper method to display a toast message with the given message.
      * @param messageId String id of the message to display.
      */
     private void displayToastMessage(final int messageId) {
@@ -394,6 +439,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         } else if (returnCode < TangoRosNode.SUCCESS) {
             mLog.error(getString(R.string.tango_service_error));
             displayToastMessage(R.string.tango_service_error);
+            mTangoService.updateStatus(ModuleStatusIndicator.Status.ERROR);
         }
     }
 
@@ -410,27 +456,42 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         }
     }
 
+    /**
+     * Helper method to configure UI elements in the activity (status indicators, Master URI, toolbar).
+     * This method shall be called in {@link #onCreate(Bundle)}.
+     */
     private void initializeUI() {
         setContentView(R.layout.main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mRosMasterConnection = new ModuleStatusIndicator(this, (ImageView) findViewById(R.id.is_ros_ok_image));
+        mTangoService = new ModuleStatusIndicator(this, (ImageView) findViewById(R.id.is_tango_ok_image));
+        mParameterConfiguration = new ModuleStatusIndicator(this, (ImageView) findViewById(R.id.is_config_ok_image));
+        mMoveBaseStatus = new ModuleStatusIndicator(this, (ImageView) findViewById(R.id.is_navigation_ok_image));
         String masterUri = mSharedPref.getString(getString(R.string.pref_master_uri_key),
                 getResources().getString(R.string.pref_master_uri_default));
         mUriTextView = (TextView) findViewById(R.id.master_uri);
         updateMasterUriUI(masterUri);
     }
 
+    /**
+     * Helper method to update the Master URI field in the UI.
+     * @param masterUri URI to display.
+     */
     private void updateMasterUriUI(final String masterUri) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 mUriTextView.setText(masterUri);
-
             }
         });
     }
 
+    /**
+     * Helper method to block the calling thread until the latch is zeroed by some other task.
+     * @param latch Latch to wait for.
+     * @param latchName Name to be used in log messages for the given latch.
+     */
     private void waitForLatchUnlock(CountDownLatch latch, String latchName) {
         try {
             mLog.info("Waiting for " + latchName + " latch release...");

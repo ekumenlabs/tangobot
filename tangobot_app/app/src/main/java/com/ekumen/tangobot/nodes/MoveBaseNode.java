@@ -50,7 +50,7 @@ public class MoveBaseNode extends NativeNodeMain {
     @Override
     public void onError(Node node, Throwable throwable) {
         if (super.executeReturnCode != 0 && log != null) {
-            log.error("Execute error code: " + Integer.toString(super.executeReturnCode));
+            log.error("Execute error code: " + Integer.toString(super.executeReturnCode), throwable);
         }
     }
 }
