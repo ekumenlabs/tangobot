@@ -26,27 +26,8 @@ public class MoveBaseNode extends NativeNodeMain {
     public static final String NODE_NAME = "move_base";
     private Log log;
 
-    private UserHook userHook;
-    private Object onPreExecutePayload;
-
     public MoveBaseNode() {
-        this(null, null);
-    }
-
-    public MoveBaseNode(UserHook hook, Object onPreExecutePayload) {
         super("move_base_jni");
-        // Set dummy hook if received a null one
-        if (hook == null) {
-            userHook = new UserHook() {
-                @Override
-                public void onPreExecute(Object o) {}
-                @Override
-                public void onError(Throwable t) {}
-            };
-        } else {
-            userHook = hook;
-        }
-        this.onPreExecutePayload = onPreExecutePayload;
     }
 
     @Override
@@ -63,20 +44,13 @@ public class MoveBaseNode extends NativeNodeMain {
     @Override
     public void onStart(ConnectedNode connectedNode) {
         log = connectedNode.getLog();
-        userHook.onPreExecute(onPreExecutePayload);
         super.onStart(connectedNode);
     }
 
     @Override
     public void onError(Node node, Throwable throwable) {
-        userHook.onError(throwable);
         if (super.executeReturnCode != 0 && log != null) {
-            log.error("Execute error code: " + Integer.toString(super.executeReturnCode));
+            log.error("Execute error code: " + Integer.toString(super.executeReturnCode), throwable);
         }
-    }
-
-    public interface UserHook {
-        void onPreExecute(Object o);
-        void onError(Throwable t);
     }
 }

@@ -41,13 +41,16 @@ import android.widget.Toast;
 import com.ekumen.tangobot.loaders.KobukiNodeLoader;
 import com.ekumen.tangobot.loaders.UsbDeviceNodeLoader;
 import com.ekumen.tangobot.nodes.MoveBaseNode;
-import com.ekumen.tangobot.nodes.ParameterLoaderNode;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.android.AppCompatRosActivity;
+import org.ros.helpers.ParameterLoaderNode;
 import org.ros.node.ConnectedNode;
+import org.ros.node.DefaultNodeListener;
+import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeListener;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
 
@@ -230,32 +233,30 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         startMoveBaseNode();
     }
 
-    private void startParameterLoaderNode(CountDownLatch latch) {
+    private void startParameterLoaderNode(final CountDownLatch latch) {
         // Create node to load configuration to Parameter Server
         mLog.info("Setting parameters in Parameter Server");
         mParameterConfiguration.updateStatus(ModuleStatusIndicator.Status.LOADING);
         NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
         nodeConfiguration.setMasterUri(mMasterUri);
         nodeConfiguration.setNodeName(ParameterLoaderNode.NODE_NAME);
-        mParameterLoaderNode = new ParameterLoaderNode(mOpenedResources,
-                new ParameterLoaderNode.UserHook() {
-                    @Override
-                    public void onSuccess(Object o) {
-                        if (o != null) {
-                            CountDownLatch latch = (CountDownLatch) o;
+        mParameterLoaderNode = new ParameterLoaderNode(mOpenedResources);
+        mNodeMainExecutor.execute(mParameterLoaderNode, nodeConfiguration,
+                new ArrayList<NodeListener>() {{
+                    add(new DefaultNodeListener() {
+                        @Override
+                        public void onShutdown(Node node) {
                             latch.countDown();
+                            mParameterConfiguration.updateStatus(ModuleStatusIndicator.Status.OK);
                         }
-                        mParameterConfiguration.updateStatus(ModuleStatusIndicator.Status.OK);
-                    }
 
-                    @Override
-                    public void onError(Throwable t) {
-                        mLog.error(t.getMessage());
-                        mParameterConfiguration.updateStatus(ModuleStatusIndicator.Status.ERROR);
-                    }
-                },
-                latch);
-        mNodeMainExecutor.execute(mParameterLoaderNode, nodeConfiguration);
+                        @Override
+                        public void onError(Node node, Throwable throwable) {
+                            mLog.error("Error loading parameters to ROS parameter server: " + throwable.getMessage(), throwable);
+                            mParameterConfiguration.updateStatus(ModuleStatusIndicator.Status.ERROR);
+                        }
+                    });
+                }});
     }
 
     private void startMoveBaseNode() {
@@ -265,25 +266,21 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
         nodeConfiguration.setMasterUri(mMasterUri);
         nodeConfiguration.setNodeName(MoveBaseNode.NODE_NAME);
-        mMoveBaseNode = new MoveBaseNode(
-                new MoveBaseNode.UserHook() {
-                    @Override
-                    public void onPreExecute(Object o) {
-                        mMoveBaseStatus.updateStatus(ModuleStatusIndicator.Status.OK);
-                    }
+        mMoveBaseNode = new MoveBaseNode();
+        mNodeMainExecutor.execute(mMoveBaseNode, nodeConfiguration,
+                new ArrayList<NodeListener>(){{
+                    add(new DefaultNodeListener() {
+                        @Override
+                        public void onStart(ConnectedNode connectedNode) {
+                            mMoveBaseStatus.updateStatus(ModuleStatusIndicator.Status.OK);
+                        }
 
-                    @Override
-                    public void onError(Throwable t) {
-                        mMoveBaseStatus.updateStatus(ModuleStatusIndicator.Status.ERROR);
-                    }
-                },
-                null
-        );
-        mNodeMainExecutor.execute(mMoveBaseNode, nodeConfiguration);
-    }
-
-    public void onStart(final ConnectedNode connectedNode) {
-
+                        @Override
+                        public void onError(Node node, Throwable throwable) {
+                            mMoveBaseStatus.updateStatus(ModuleStatusIndicator.Status.ERROR);
+                        }
+                    });
+                }});
     }
 
     @Override
