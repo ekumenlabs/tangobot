@@ -12,7 +12,7 @@ Install all the package dependencies in case you don't have all the turtlebot de
 ```
 cd ~/tangobot_ws/src/tangobot/std_turtlebot
 sudo apt-get update
-rosdep install std_turtlebot
+rosdep install -r std_turtlebot
 ```
 Finally, build this package and source the workspace script:
 ```
@@ -32,8 +32,9 @@ You are done! Your turtlebot is now running in your laptop.
 You will want to see the turtlebot in your computer and send some target goals. To do so, follow these steps from your computer:
 ```
 export ROS_MASTER_URI=http://TURTLEBOT_IP_ADDRESS:11311
+export ROS_IP=YOUR_IP_ADDRESS
 roslaunch std_turtlebot view_navigation.launch
 ```
-
+You can check your computer's IP address by running `ifconfig` in a command line.
 You should now see your turtlebot in the middle of an empty map, along with its costmaps and the laser scan. You can send navigation goals using RVIZ.
 Optionally, use the launchfile named `view_model.launch` to view the robot model only, without the maps. You can manually add them later.

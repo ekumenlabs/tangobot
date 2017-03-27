@@ -3,19 +3,9 @@
  -->
 
 <launch>
-  <arg name="base"       value="$(optenv TURTLEBOT_BASE kobuki)"/>  <!-- create, rhoomba -->
-  <arg name="stacks"     value="$(optenv TURTLEBOT_STACKS hexagons)"/>  <!-- circles, hexagons -->
-  <arg name="3d_sensor"  value="$(optenv TURTLEBOT_3D_SENSOR kinect)"/>  <!-- kinect, asus_xtion_pro -->
-  
-  <include file="$(find turtlebot_bringup)/launch/includes/robot.launch.xml">
-    <arg name="base" value="$(arg base)" />
-    <arg name="stacks" value="$(arg stacks)" />
-    <arg name="3d_sensor" value="$(arg 3d_sensor)" />
+  <include file="$(find navigation_setup)/launch/tools/robot_model_bringup.launch">
+    <arg name="3d_sensor" value="kinect" />
   </include>
-  
-  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
-    <param name="use_gui" value="true"/>
-  </node>
   
   <include file="$(find turtlebot_rviz_launchers)/launch/view_navigation.launch" />
 </launch>
