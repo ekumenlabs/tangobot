@@ -1,5 +1,5 @@
 # std_turtlebot
-This package helps to install and run a standard turtlebot using a laptop (tested on Ubuntu 16.04 and ROS Kinetic) and a Kinect v1 sensor. The default setup uses an empty map to navigate without AMCL.
+This package helps to install and run a standard turtlebot using a laptop (tested on Ubuntu 16.04 and ROS Kinetic) and a Kinect v1 sensor optionally. The default setup uses an empty map to navigate without AMCL.
 
 ## Installation
 Clone [tangobot repository](https://github.com/ekumenlabs/tangobot) into a workspace folder. For example:
@@ -23,12 +23,12 @@ source devel/setup.bash
 Note: you should install this package in your computer and your laptop.
 
 ## Usage
-From your laptop, start a ROS master. Connect the laptop to the turtlebot, and to the Kinect sensor (this one is optional; if no sensor is connected the robot will navigate blind).
-Then, run the start script:
+Connect the laptop to the turtlebot, and to the Kinect sensor (this one is optional; if no sensor is connected the robot will navigate blind).
+Then, run the startup script:
 ```
 roslaunch std_turtlebot turtlebot_baseline.launch
 ```
-You are done! Your turtlebot is now running in your laptop.
+You are done! Your turtlebot is now running in your laptop, as well as a ROS Master.
 You will want to see the turtlebot in your computer and send some target goals. To do so, follow these steps from your computer:
 ```
 export ROS_MASTER_URI=http://TURTLEBOT_IP_ADDRESS:11311
