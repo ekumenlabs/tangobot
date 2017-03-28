@@ -62,7 +62,16 @@ if __name__ == '__main__':
     
     tx_odom_map = [[1, 0, 0, 5], [0, 1, 0, 5], [0, 0, 1, 0], [0, 0, 0, 1]]
     tx_map_odom = t.inverse_matrix(tx_odom_map)
-
+    
+    t_sos_odom = t.translation_from_matrix(tx_sos_odom)
+    r_sos_odom = t.quaternion_from_matrix(tx_sos_odom)
+    
+    t_rob_dev = t.translation_from_matrix(tx_rob_dev)
+    r_rob_dev = t.quaternion_from_matrix(tx_rob_dev)
+    
+    t_odom_map = t.translation_from_matrix(tx_odom_map)
+    r_odom_map = t.quaternion_from_matrix(tx_odom_map)
+    
     lastCommonTime = 0
 
     while not rospy.is_shutdown():
@@ -84,20 +93,20 @@ if __name__ == '__main__':
         
         if sendTransform:
             sendTransform = False
-            broadcaster.sendTransform(t.translation_from_matrix(tx_sos_odom), 
-                t.quaternion_from_matrix(tx_sos_odom),
+            broadcaster.sendTransform(t_sos_odom, 
+                r_sos_odom,
                 time,
                 'start_of_service',
                 'odom')
 
-            broadcaster.sendTransform(t.translation_from_matrix(tx_rob_dev), 
-                t.quaternion_from_matrix(tx_rob_dev),
+            broadcaster.sendTransform(t_rob_dev, 
+                r_rob_dev,
                 time,
                 'base_footprint',
                 'device')
                 
-            broadcaster.sendTransform(t.translation_from_matrix(tx_odom_map), 
-                t.quaternion_from_matrix(tx_odom_map),
+            broadcaster.sendTransform(t_odom_map, 
+                r_odom_map,
                 time,
                 'odom',
                 'map')
