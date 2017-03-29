@@ -40,9 +40,9 @@ import android.widget.Toast;
 
 import com.ekumen.tangobot.loaders.KobukiNodeLoader;
 import com.ekumen.tangobot.loaders.UsbDeviceNodeLoader;
-import com.ekumen.tangobot.nodes.DefaultMapTransformPublisherNode;
-import com.ekumen.tangobot.nodes.DefaultRobotTransformPublisherNode;
-import com.ekumen.tangobot.nodes.ExtrinsicsPublisherNode;
+import com.ekumen.tangobot.nodes.DefaultMapTfPublisherNode;
+import com.ekumen.tangobot.nodes.DefaultRobotTfPublisherNode;
+import com.ekumen.tangobot.nodes.ExtrinsicsTfPublisherNode;
 import com.ekumen.tangobot.nodes.MoveBaseNode;
 
 import org.apache.commons.logging.Log;
@@ -92,8 +92,8 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
     private TangoRosNode mTangoRosNode;
     private MoveBaseNode mMoveBaseNode;
     private ParameterLoaderNode mParameterLoaderNode;
-    private ExtrinsicsPublisherNode mRobotExtrinsicsPublisherNode;
-    private ExtrinsicsPublisherNode mMapExtrinsicsPublisherNode;
+    private ExtrinsicsTfPublisherNode mRobotExtrinsicsTfPublisherNode;
+    private ExtrinsicsTfPublisherNode mMapExtrinsicsTfPublisherNode;
 
     // Status
     private ModuleStatusIndicator mRosMasterConnection;
@@ -203,7 +203,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
             manager.requestPermission(device, mUsbPermissionIntent);
         }
 
-        checkRosMasterConenction();
+        checkRosMasterConnection();
         configureParameterServer();
 
         startExtrinsicsPublisherNodes();
@@ -217,7 +217,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
      * Attempts a connection to the configured ROS Master URI, handling status lights.
      * Blocks this thread if the connection is not successful.
      */
-    private void checkRosMasterConenction() {
+    private void checkRosMasterConnection() {
         mRosMasterConnection.updateStatus(ModuleStatusIndicator.Status.LOADING);
         CountDownLatch latch = new CountDownLatch(1);
         new MasterConnectionChecker(mMasterUri.toString(),
@@ -307,13 +307,13 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         mLog.info("Starting extrinsics publishers");
         NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
         nodeConfiguration.setMasterUri(mMasterUri);
-        nodeConfiguration.setNodeName(DefaultMapTransformPublisherNode.NODE_NAME);
-        mMapExtrinsicsPublisherNode = new DefaultMapTransformPublisherNode();
-        mNodeMainExecutor.execute(mMapExtrinsicsPublisherNode, nodeConfiguration);
+        nodeConfiguration.setNodeName(DefaultMapTfPublisherNode.NODE_NAME);
+        mMapExtrinsicsTfPublisherNode = new DefaultMapTfPublisherNode();
+        mNodeMainExecutor.execute(mMapExtrinsicsTfPublisherNode, nodeConfiguration);
 
-        nodeConfiguration.setNodeName(DefaultRobotTransformPublisherNode.NODE_NAME);
-        mRobotExtrinsicsPublisherNode = new DefaultRobotTransformPublisherNode();
-        mNodeMainExecutor.execute(mRobotExtrinsicsPublisherNode, nodeConfiguration);
+        nodeConfiguration.setNodeName(DefaultRobotTfPublisherNode.NODE_NAME);
+        mRobotExtrinsicsTfPublisherNode = new DefaultRobotTfPublisherNode();
+        mNodeMainExecutor.execute(mRobotExtrinsicsTfPublisherNode, nodeConfiguration);
     }
 
     @Override

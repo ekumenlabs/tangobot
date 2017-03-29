@@ -21,10 +21,10 @@ import org.ros.rosjava_geometry.Transform;
 import org.ros.rosjava_geometry.Vector3;
 
 // TODO: these transformations should be configurable with a YAML file or a similar mechanism.
-public class DefaultMapTransformPublisherNode extends ExtrinsicsPublisherNode {
+public class DefaultMapTfPublisherNode extends ExtrinsicsTfPublisherNode {
     public static final String NODE_NAME = "map_extrinsics_publisher";
 
-    public DefaultMapTransformPublisherNode() {
+    public DefaultMapTfPublisherNode() {
         super();
 
         // map --> odom transformation

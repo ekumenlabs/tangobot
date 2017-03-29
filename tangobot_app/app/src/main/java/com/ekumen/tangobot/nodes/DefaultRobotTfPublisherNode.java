@@ -21,10 +21,10 @@ import org.ros.rosjava_geometry.Transform;
 import org.ros.rosjava_geometry.Vector3;
 
 // TODO: these transformations should be configurable with a YAML file or a similar mechanism.
-public class DefaultRobotTransformPublisherNode extends ExtrinsicsPublisherNode {
+public class DefaultRobotTfPublisherNode extends ExtrinsicsTfPublisherNode {
     public static final String NODE_NAME = "robot_extrinsics_publisher";
 
-    public DefaultRobotTransformPublisherNode() {
+    public DefaultRobotTfPublisherNode() {
         super();
 
         // odom --> start_of_service transformation

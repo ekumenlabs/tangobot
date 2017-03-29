@@ -35,13 +35,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import geometry_msgs.TransformStamped;
-import std_msgs.Header;
 import tf2_msgs.TFMessage;
 
 /**
  * Node that publishes a specified set of transforms between frames at a given rate to /tf.
  */
-public class ExtrinsicsPublisherNode extends AbstractNodeMain {
+public class ExtrinsicsTfPublisherNode extends AbstractNodeMain {
 
     public static final String NODE_NAME = "extrinsics_publisher";
 
@@ -51,9 +50,9 @@ public class ExtrinsicsPublisherNode extends AbstractNodeMain {
     private List<TransformStamped> tfsList = new ArrayList<>();
     private int publishRate = 100;
 
-    public ExtrinsicsPublisherNode() {}
+    public ExtrinsicsTfPublisherNode() {}
 
-    public ExtrinsicsPublisherNode(List<TransformStamped> tfsList, int publishRate) {
+    public ExtrinsicsTfPublisherNode(List<TransformStamped> tfsList, int publishRate) {
         Preconditions.checkNotNull(tfsList);
         this.tfsList = tfsList;
         setPublishRate(publishRate);
@@ -126,8 +125,7 @@ public class ExtrinsicsPublisherNode extends AbstractNodeMain {
                 if (!tfsList.isEmpty()) {
                     Time time = Time.fromMillis(System.currentTimeMillis());
                     for (TransformStamped tfs : tfsList) {
-                        Header header = tfs.getHeader();
-                        header.setStamp(time);
+                        tfs.getHeader().setStamp(time);
                     }
 
                     TFMessage tfm = tfPublisher.newMessage();
