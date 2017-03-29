@@ -1,6 +1,24 @@
+/*
+ * Copyright 2017 Ekumen, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.ekumen.tangobot.nodes;
 
-import org.apache.commons.logging.Log;
+import com.google.common.base.Preconditions;
+
+import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.WallTimeRate;
 import org.ros.message.MessageFactory;
 import org.ros.message.Time;
@@ -20,37 +38,26 @@ import geometry_msgs.TransformStamped;
 import std_msgs.Header;
 import tf2_msgs.TFMessage;
 
-/*
-    First version:
-        - Publish hardcoded extrinsics added to a list of transform stamped
-    Second version:
-        - Use a YAML file and parameter loader node to load configurations into parameter server
-        - Retrieve configuration from extrinsics publisher for a given namespace in constructor and
-        then iterate through that tree/ list for all transform names available.
-        /extrinsics/transform_name_1/frame
-        /extrinsics/transform_name_1/child_frame
-        /extrinsics/transform_name_1/translation/x
-        /extrinsics/transform_name_1/translation/y
-        /extrinsics/transform_name_1/translation/z
-        /extrinsics/transform_name_1/rotation/qw
-        /extrinsics/transform_name_1/rotation/qx
-        /extrinsics/transform_name_1/rotation/qy
-        /extrinsics/transform_name_1/rotation/qz
+/**
+ * Node that publishes a specified set of transforms between frames at a given rate to /tf.
  */
-
 public class ExtrinsicsPublisherNode extends AbstractNodeMain {
 
     public static final String NODE_NAME = "extrinsics_publisher";
 
-    NodeConfiguration mNodeConfiguration = NodeConfiguration.newPrivate();
-    MessageFactory mMessageFactory = mNodeConfiguration.getTopicMessageFactory();
-
+    private NodeConfiguration mNodeConfiguration = NodeConfiguration.newPrivate();
+    protected MessageFactory mMessageFactory = mNodeConfiguration.getTopicMessageFactory();
     protected Publisher<TFMessage> tfPublisher;
-    List<TransformStamped> tfsList = new ArrayList<>();
-    private TransformStamped tfsOdomToSos;
-    private Log mLog;
-    private TransformStamped tfsDeviceToRobot;
-    private TransformStamped tfsMapToOdom;
+    private List<TransformStamped> tfsList = new ArrayList<>();
+    private int publishRate = 100;
+
+    public ExtrinsicsPublisherNode() {}
+
+    public ExtrinsicsPublisherNode(List<TransformStamped> tfsList, int publishRate) {
+        Preconditions.checkNotNull(tfsList);
+        this.tfsList = tfsList;
+        setPublishRate(publishRate);
+    }
 
     @Override
     public GraphName getDefaultNodeName() {
@@ -60,64 +67,75 @@ public class ExtrinsicsPublisherNode extends AbstractNodeMain {
     @Override
     public void onStart(ConnectedNode connectedNode) {
         super.onStart(connectedNode);
-        mLog = connectedNode.getLog();
         tfPublisher = connectedNode.newPublisher("/tf", TFMessage._TYPE);
 
-        // odom --> start_of_service transformation
-        tfsOdomToSos = mMessageFactory.newFromType(TransformStamped._TYPE);
-        tfsOdomToSos.getHeader().setFrameId("odom");
-        tfsOdomToSos.setChildFrameId("start_of_service");
-
-        Transform tfOdomToSos = new Transform(
-                new Vector3(0, 0, 0.5),
-                Quaternion.fromAxisAngle(Vector3.zAxis(), -Math.PI/2));
-        tfOdomToSos.toTransformMessage(tfsOdomToSos.getTransform());
-        tfsList.add(tfsOdomToSos);
-
-        // device --> base_footprint transformation
-        tfsDeviceToRobot = mMessageFactory.newFromType(TransformStamped._TYPE);
-        tfsDeviceToRobot.getHeader().setFrameId("device");
-        tfsDeviceToRobot.setChildFrameId("base_footprint");
-
-        Transform tfDeviceToRobot = new Transform(
-                new Vector3(0, -0.4771263, -0.14950081),
-                new Quaternion(-0.41862823, 0.41862823, 0.56986876, 0.56986876));
-        tfDeviceToRobot.toTransformMessage(tfsDeviceToRobot.getTransform());
-        tfsList.add(tfsDeviceToRobot);
-
-        // map --> odom transmformation
-        tfsMapToOdom = mMessageFactory.newFromType(TransformStamped._TYPE);
-        tfsMapToOdom.getHeader().setFrameId("map");
-        tfsMapToOdom.setChildFrameId("odom");
-
-        Transform tfMapToOdom = new Transform(
-                new Vector3(5, 5, 0),
-                Quaternion.identity());
-        tfMapToOdom.toTransformMessage(tfsMapToOdom.getTransform());
-        tfsList.add(tfsMapToOdom);
-
-        startPublishing();
+        startPublishing(connectedNode);
     }
 
-    private void startPublishing() {
-        try {
-            WallTimeRate rate = new WallTimeRate(100);
+    /**
+     * Add a transform to publish from parentFrame to childFrame.
+     * @param transform Transform to publish, containing a translation ({@link Vector3}) and a rotation ({@link Quaternion}).
+     * @param parentFrame Name of the parent frame.
+     * @param childFrame Name of the child frame.
+     * @return Reference to the added transformation; save it to remove it afterwards.
+     */
+    public Object addTransformation(Transform transform, String parentFrame, String childFrame) {
+        Preconditions.checkNotNull(transform);
+        Preconditions.checkNotNull(parentFrame);
+        Preconditions.checkNotNull(childFrame);
 
-            while (true) {
-                Time time = Time.fromMillis(System.currentTimeMillis());
-                for (TransformStamped tfs : tfsList) {
-                    Header header = tfs.getHeader();
-                    header.setStamp(time);
+        TransformStamped tfs = mMessageFactory.newFromType(TransformStamped._TYPE);
+        tfs.getHeader().setFrameId(parentFrame);
+        tfs.setChildFrameId(childFrame);
+
+        transform.toTransformMessage(tfs.getTransform());
+        tfsList.add(tfs);
+        return tfs;
+    }
+
+    /**
+     * Remove transformation from the list to publish.
+     * @param tfsIndex Transformation reference to remove.
+     */
+    public void removeTransformation(Object tfsIndex) {
+        tfsList.remove(tfsIndex);
+    }
+
+    /**
+     * Clears all transformations from the list
+     */
+    public void removeAllTransformations() {
+        tfsList.clear();
+    }
+
+    /**
+     * Sets publish rate [Hz] for all the previously added transformations.
+     * @param publishRate Rate in Hz to publish the transformations.
+     */
+    public void setPublishRate(int publishRate) {
+        Preconditions.checkArgument(publishRate > 0);
+        this.publishRate = publishRate;
+    }
+
+    private void startPublishing(ConnectedNode connectedNode) {
+        connectedNode.executeCancellableLoop(new CancellableLoop() {
+            @Override
+            protected void loop() throws InterruptedException {
+                WallTimeRate rate = new WallTimeRate(publishRate);
+
+                if (!tfsList.isEmpty()) {
+                    Time time = Time.fromMillis(System.currentTimeMillis());
+                    for (TransformStamped tfs : tfsList) {
+                        Header header = tfs.getHeader();
+                        header.setStamp(time);
+                    }
+
+                    TFMessage tfm = tfPublisher.newMessage();
+                    tfm.setTransforms(tfsList);
+                    tfPublisher.publish(tfm);
                 }
-
-                TFMessage tfm = tfPublisher.newMessage();
-                tfm.setTransforms(tfsList);
-                tfPublisher.publish(tfm);
                 rate.sleep();
             }
-
-        } catch (Throwable t) {
-            mLog.error("Exception occurred in publisher loop", t);
-        }
+        });
     }
 }

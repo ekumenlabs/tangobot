@@ -40,6 +40,8 @@ import android.widget.Toast;
 
 import com.ekumen.tangobot.loaders.KobukiNodeLoader;
 import com.ekumen.tangobot.loaders.UsbDeviceNodeLoader;
+import com.ekumen.tangobot.nodes.DefaultMapTransformPublisherNode;
+import com.ekumen.tangobot.nodes.DefaultRobotTransformPublisherNode;
 import com.ekumen.tangobot.nodes.ExtrinsicsPublisherNode;
 import com.ekumen.tangobot.nodes.MoveBaseNode;
 
@@ -90,7 +92,8 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
     private TangoRosNode mTangoRosNode;
     private MoveBaseNode mMoveBaseNode;
     private ParameterLoaderNode mParameterLoaderNode;
-    private ExtrinsicsPublisherNode mExtrinsicsPublisherNode;
+    private ExtrinsicsPublisherNode mRobotExtrinsicsPublisherNode;
+    private ExtrinsicsPublisherNode mMapExtrinsicsPublisherNode;
 
     // Status
     private ModuleStatusIndicator mRosMasterConnection;
@@ -203,7 +206,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         checkRosMasterConenction();
         configureParameterServer();
 
-        startExtrinsicsPublisherNode();
+        startExtrinsicsPublisherNodes();
 
         // Start Tango node and navigation stack.
         startTangoRosNode();
@@ -299,16 +302,19 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
                 }});
     }
 
-    private void startExtrinsicsPublisherNode() {
+    private void startExtrinsicsPublisherNodes() {
         // Create ROS node for extrinsics publisher node
-        mLog.info("Starting extrinsics publisher node");
+        mLog.info("Starting extrinsics publishers");
         NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
         nodeConfiguration.setMasterUri(mMasterUri);
-        nodeConfiguration.setNodeName(ExtrinsicsPublisherNode.NODE_NAME);
-        mExtrinsicsPublisherNode = new ExtrinsicsPublisherNode();
-        mNodeMainExecutor.execute(mExtrinsicsPublisherNode, nodeConfiguration);
-    }
+        nodeConfiguration.setNodeName(DefaultMapTransformPublisherNode.NODE_NAME);
+        mMapExtrinsicsPublisherNode = new DefaultMapTransformPublisherNode();
+        mNodeMainExecutor.execute(mMapExtrinsicsPublisherNode, nodeConfiguration);
 
+        nodeConfiguration.setNodeName(DefaultRobotTransformPublisherNode.NODE_NAME);
+        mRobotExtrinsicsPublisherNode = new DefaultRobotTransformPublisherNode();
+        mNodeMainExecutor.execute(mRobotExtrinsicsPublisherNode, nodeConfiguration);
+    }
 
     @Override
     public void onResume() {
