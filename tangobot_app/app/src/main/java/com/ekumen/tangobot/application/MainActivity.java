@@ -43,7 +43,9 @@ import com.ekumen.tangobot.loaders.UsbDeviceNodeLoader;
 import com.ekumen.tangobot.nodes.DefaultMapTfPublisherNode;
 import com.ekumen.tangobot.nodes.DefaultRobotTfPublisherNode;
 import com.ekumen.tangobot.nodes.ExtrinsicsTfPublisherNode;
+import com.ekumen.tangobot.nodes.EmptyMapGenerator;
 import com.ekumen.tangobot.nodes.MoveBaseNode;
+import com.ekumen.tangobot.nodes.OccupancyGridPublisherNode;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -94,6 +96,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
     private ParameterLoaderNode mParameterLoaderNode;
     private ExtrinsicsTfPublisherNode mRobotExtrinsicsTfPublisherNode;
     private ExtrinsicsTfPublisherNode mMapExtrinsicsTfPublisherNode;
+    private OccupancyGridPublisherNode mOccupancyGridPublisherNode;
 
     // Status
     private ModuleStatusIndicator mRosMasterConnection;
@@ -207,6 +210,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         configureParameterServer();
 
         startExtrinsicsPublisherNodes();
+        startMapServerNode();
 
         // Start Tango node and navigation stack.
         startTangoRosNode();
@@ -314,6 +318,16 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         nodeConfiguration.setNodeName(DefaultRobotTfPublisherNode.NODE_NAME);
         mRobotExtrinsicsTfPublisherNode = new DefaultRobotTfPublisherNode();
         mNodeMainExecutor.execute(mRobotExtrinsicsTfPublisherNode, nodeConfiguration);
+    }
+
+    private void startMapServerNode() {
+        // Create ROS node to publish the map
+        mLog.info("Starting map server");
+        NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
+        nodeConfiguration.setMasterUri(mMasterUri);
+        nodeConfiguration.setNodeName(OccupancyGridPublisherNode.NODE_NAME);
+        mOccupancyGridPublisherNode = new OccupancyGridPublisherNode(new EmptyMapGenerator());
+        mNodeMainExecutor.execute(mOccupancyGridPublisherNode, nodeConfiguration);
     }
 
     @Override
