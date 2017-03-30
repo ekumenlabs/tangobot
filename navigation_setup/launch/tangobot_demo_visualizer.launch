@@ -15,9 +15,6 @@
     <arg name="3d_sensor" value="$(arg 3d_sensor)" />
   </include>
 
-  <!-- publish device pose -->
-  <node pkg="dynamic_reconfigure" name="dynparam" type="dynparam" args="set /tango publish_device_pose true"/>
-
   <!--  **************** Visualisation ****************  -->
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find navigation_setup)/include/robot_navigation.rviz"/>
 </launch>

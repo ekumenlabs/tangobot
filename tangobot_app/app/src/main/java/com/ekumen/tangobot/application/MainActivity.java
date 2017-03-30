@@ -114,6 +114,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         add(new Pair<>(R.raw.move_base_params, MoveBaseNode.NODE_NAME));
         add(new Pair<>(R.raw.global_planner_params, MoveBaseNode.NODE_NAME + "/GlobalPlanner"));
         add(new Pair<>(R.raw.navfn_global_planner_params, MoveBaseNode.NODE_NAME + "/NavfnROS"));
+        add(new Pair<>(R.raw.tango_node_params, "/tango"));
     }};
 
     private ArrayList<ParameterLoaderNode.Resource> mOpenedResources = new ArrayList<>();
@@ -440,7 +441,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
             mTangoRosNode = new TangoRosNode();
             mTangoRosNode.attachCallbackListener(this);
             TangoInitializationHelper.bindTangoService(this, mTangoServiceConnection);
-            if (TangoInitializationHelper.checkTangoVersionOk(this)) {
+            if (TangoInitializationHelper.isTangoVersionOk()) {
                 mNodeMainExecutor.execute(mTangoRosNode, nodeConfiguration);
             } else {
                 mLog.error(getString(R.string.tango_version_error));
