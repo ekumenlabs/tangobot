@@ -20,7 +20,11 @@ import org.ros.rosjava_geometry.Quaternion;
 import org.ros.rosjava_geometry.Transform;
 import org.ros.rosjava_geometry.Vector3;
 
-// TODO: these transformations should be configurable with a YAML file or a similar mechanism.
+
+/**
+ * This class defines a transformation between Map and Odom frames for demo purposes.
+ * TODO: these transformations should be configurable with a YAML file or a similar mechanism.
+ */
 public class DefaultMapTfPublisherNode extends ExtrinsicsTfPublisherNode {
     public static final String NODE_NAME = "map_extrinsics_publisher";
 
@@ -28,6 +32,7 @@ public class DefaultMapTfPublisherNode extends ExtrinsicsTfPublisherNode {
         super();
 
         // map --> odom transformation
+        // Using a (x,y) = (5,5) transformation assuming a 10x10 empty map.
         addTransformation(
                 new Transform(
                         new Vector3(5, 5, 0),

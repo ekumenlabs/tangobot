@@ -20,10 +20,25 @@ import org.ros.rosjava_geometry.Quaternion;
 import org.ros.rosjava_geometry.Transform;
 import org.ros.rosjava_geometry.Vector3;
 
-// TODO: these transformations should be configurable with a YAML file or a similar mechanism.
+/**
+ *  This class defines transformations to complete the TF tree with the frames required
+ *  by the navigation stack, according to the ones provided by Tango.
+ *  TODO: these transformations should be configurable with a YAML file or a similar mechanism.
+ */
 public class DefaultRobotTfPublisherNode extends ExtrinsicsTfPublisherNode {
     public static final String NODE_NAME = "robot_extrinsics_publisher";
 
+    /*
+     * Two corrections are applied to complement Tango frames, so that a complete transformation between
+     * /odom and /base_footprint can be constructed.
+     * Odom is a fixed frame in space, which is located in the same coordinates of SOS frame, but rotated -90 degrees in Z axis. That way,
+     * the odometry starts with X aligned to the front of the robot instead of Y.
+     * The second correction is between the device and the robot. It assumes that the device will be placed over a dock on the
+     * top of the robot, and that the dock will be parallel to the robot's front. That way, the Tango device will have its X axis pointing
+     * to the right of the robot, Y pointing to the front, and Z pointing to the back (these last two rotated by the dock). Then, the
+     * second correction will correct the dock's angle, and the axis orientation difference (robot's front is X axis, not Y).
+     * Apart from that, the height at which the device is placed is accounted in both transformations.
+     */
     public DefaultRobotTfPublisherNode() {
         super();
 
@@ -38,8 +53,7 @@ public class DefaultRobotTfPublisherNode extends ExtrinsicsTfPublisherNode {
         );
 
         // device --> base_footprint transformation
-        // Taken from tango_extrinsics_publisher; this transformation accounts dock inclination and placement
-        // over the robot.
+        // This transformation accounts dock inclination and placement over the robot.
         addTransformation(
                 new Transform(
                         new Vector3(0, -0.4771263, -0.14950081),
