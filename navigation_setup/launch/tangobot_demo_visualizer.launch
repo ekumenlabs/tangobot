@@ -25,8 +25,6 @@
 
   <!-- publish device pose -->
   <node pkg="dynamic_reconfigure" name="dynparam" type="dynparam" args="set /tango publish_device_pose true"/>
-  <!-- publish remaining transformations -->
-  <node pkg="navigation_setup" name="tango_extrinsics_publisher" type="tango_extrinsics_publisher"/>
 
   <!--  **************** Visualisation ****************  -->
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find navigation_setup)/include/robot_navigation.rviz"/>

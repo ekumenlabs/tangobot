@@ -1,4 +1,9 @@
-<!-- This file is used to give an arbitrary reference between map and odom frames, publishing the transform to tf at a low rate -->
+<!-- This file is used to give an arbitrary reference between map and odom frames, publishing the transform to tf at specified period -->
 <launch>
-    <node pkg="tf" type="static_transform_publisher" name="map_to_odom" args="5 5 0 0 0 0 map odom 100" />
+    <arg name="period" default="100"/>
+    <arg name="x_start" default="5"/>
+    <arg name="y_start" default="5"/>
+    <arg name="angle_start" default="0"/>   <!-- Yaw offset -->
+
+    <node pkg="tf" type="static_transform_publisher" name="map_to_odom" args="$(arg x_start) $(arg x_start) 0 $(arg angle_start) 0 0 map odom $(arg period)" />
 </launch>

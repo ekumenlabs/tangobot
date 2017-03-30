@@ -40,6 +40,9 @@ import android.widget.Toast;
 
 import com.ekumen.tangobot.loaders.KobukiNodeLoader;
 import com.ekumen.tangobot.loaders.UsbDeviceNodeLoader;
+import com.ekumen.tangobot.nodes.DefaultMapTfPublisherNode;
+import com.ekumen.tangobot.nodes.DefaultRobotTfPublisherNode;
+import com.ekumen.tangobot.nodes.ExtrinsicsTfPublisherNode;
 import com.ekumen.tangobot.nodes.MoveBaseNode;
 
 import org.apache.commons.logging.Log;
@@ -89,6 +92,8 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
     private TangoRosNode mTangoRosNode;
     private MoveBaseNode mMoveBaseNode;
     private ParameterLoaderNode mParameterLoaderNode;
+    private ExtrinsicsTfPublisherNode mRobotExtrinsicsTfPublisherNode;
+    private ExtrinsicsTfPublisherNode mMapExtrinsicsTfPublisherNode;
 
     // Status
     private ModuleStatusIndicator mRosMasterConnection;
@@ -198,7 +203,21 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
             manager.requestPermission(device, mUsbPermissionIntent);
         }
 
-        // Attempt a connection to ROS master
+        checkRosMasterConnection();
+        configureParameterServer();
+
+        startExtrinsicsPublisherNodes();
+
+        // Start Tango node and navigation stack.
+        startTangoRosNode();
+        startMoveBaseNode();
+    }
+
+    /**
+     * Attempts a connection to the configured ROS Master URI, handling status lights.
+     * Blocks this thread if the connection is not successful.
+     */
+    private void checkRosMasterConnection() {
         mRosMasterConnection.updateStatus(ModuleStatusIndicator.Status.LOADING);
         CountDownLatch latch = new CountDownLatch(1);
         new MasterConnectionChecker(mMasterUri.toString(),
@@ -222,15 +241,15 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
                 latch
         ).runTest();
         waitForLatchUnlock(latch, "ROS");
+    }
 
-        // Configure parameter server and wait until all parameters are set.
-        latch = new CountDownLatch(1);
+    /**
+     * Starts {@link ParameterLoaderNode} and waits for it to finish setting parameters.
+     */
+    private void configureParameterServer() {
+        CountDownLatch latch = new CountDownLatch(1);
         startParameterLoaderNode(latch);
         waitForLatchUnlock(latch, "parameter");
-
-        // Start Tango node and navigation stack.
-        startTangoRosNode();
-        startMoveBaseNode();
     }
 
     private void startParameterLoaderNode(final CountDownLatch latch) {
@@ -281,6 +300,20 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
                         }
                     });
                 }});
+    }
+
+    private void startExtrinsicsPublisherNodes() {
+        // Create ROS node for extrinsics publisher node
+        mLog.info("Starting extrinsics publishers");
+        NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
+        nodeConfiguration.setMasterUri(mMasterUri);
+        nodeConfiguration.setNodeName(DefaultMapTfPublisherNode.NODE_NAME);
+        mMapExtrinsicsTfPublisherNode = new DefaultMapTfPublisherNode();
+        mNodeMainExecutor.execute(mMapExtrinsicsTfPublisherNode, nodeConfiguration);
+
+        nodeConfiguration.setNodeName(DefaultRobotTfPublisherNode.NODE_NAME);
+        mRobotExtrinsicsTfPublisherNode = new DefaultRobotTfPublisherNode();
+        mNodeMainExecutor.execute(mRobotExtrinsicsTfPublisherNode, nodeConfiguration);
     }
 
     @Override
