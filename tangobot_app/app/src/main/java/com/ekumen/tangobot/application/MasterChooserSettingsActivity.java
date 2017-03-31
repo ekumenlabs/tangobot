@@ -44,7 +44,12 @@ public abstract class MasterChooserSettingsActivity extends AppCompatPreferenceA
 
     protected SettingsPreferenceFragment mSettingsPreferenceFragment;
     protected SharedPreferences mSharedPref;
-    private static boolean masterConnectionAttempted;
+
+    /**
+     * False if the application hasn't executed {@link #onBackPressed()} during this session
+     * (i.e., settings weren't applied yet), false otherwise.
+     */
+    private static boolean settingsApplied = false;
 
     /**
      * A preference value change listener that updates the preference's summary
@@ -146,11 +151,12 @@ public abstract class MasterChooserSettingsActivity extends AppCompatPreferenceA
 
     @Override
     public void onBackPressed() {
-        // Try to connect to Master by default when this activity wasn't launched by a user.
-        boolean userForcedLaunch = getIntent().getBooleanExtra("user_forced_launch", false);
-        if (!userForcedLaunch) {
+        // Attempt master connection only on first run of this activity.
+        if (!settingsApplied) {
             masterConnectionAttemptSetup();
+            settingsApplied = true;
         }
+
         super.onBackPressed();
     }
 
@@ -164,11 +170,10 @@ public abstract class MasterChooserSettingsActivity extends AppCompatPreferenceA
             String uri = mSharedPref.getString(getResources().getString(R.string.pref_master_uri_key), "");
             intent.putExtra("ROS_MASTER_URI", uri);
         }
-        masterConnectionAttempted = true;
         setResult(RESULT_OK, intent);
     }
 
-    protected boolean masterConnectionWasAttempted() {
-        return masterConnectionAttempted;
+    protected boolean settingsWereAppliedThisSession() {
+        return settingsApplied;
     }
 }

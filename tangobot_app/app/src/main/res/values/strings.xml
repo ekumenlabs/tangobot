@@ -26,4 +26,9 @@
     <string name="pref_use_same_config_next_time_title">Show settings on startup</string>
     <string name="pref_show_settings_on_startup_key">pref_show_settings_on_startup</string>
     <string name="pref_show_settings_on_startup_summary">Enable to show this screen next time</string>
+
+    <!-- Settings texts -->
+    <string name="welcome_text_first_run">Welcome to Tangobot app! Please define your settings to continue.</string>
+    <string name="snackbar_text_first_run">Click DONE to start after your settings are ready</string>
+    <string name="snackbar_action_text_first_run">Done</string>
 </resources>
