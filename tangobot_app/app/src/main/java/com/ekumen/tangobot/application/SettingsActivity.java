@@ -19,6 +19,7 @@ package com.ekumen.tangobot.application;
 import android.content.SharedPreferences;
 import android.support.design.widget.Snackbar;
 import android.view.View;
+import android.widget.Toast;
 
 
 public class SettingsActivity extends MasterChooserSettingsActivity {
@@ -27,12 +28,36 @@ public class SettingsActivity extends MasterChooserSettingsActivity {
         if (key == getString(R.string.pref_master_is_local_key) ||
                 key == getString(R.string.pref_master_uri_key)) {
 
-            if (masterConnectionWasAttempted() && mSettingsPreferenceFragment.getView() != null) {
-                Snackbar snackbar = Snackbar.make(mSettingsPreferenceFragment.getView(), getString(R.string.snackbar_text_restart), Snackbar.LENGTH_INDEFINITE);
+            if (settingsWereAppliedThisSession() && mSettingsPreferenceFragment.getView() != null) {
+                Snackbar snackbar = Snackbar.make(mSettingsPreferenceFragment.getView(),
+                        getString(R.string.snackbar_text_restart), Snackbar.LENGTH_INDEFINITE);
                 View snackBarView = snackbar.getView();
                 snackBarView.setBackgroundColor(getResources().getColor(android.R.color.holo_orange_dark));
                 snackbar.show();
             }
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (!settingsWereAppliedThisSession()) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getApplicationContext(), R.string.welcome_text_first_run, Toast.LENGTH_LONG).show();
+                }
+            });
+
+            Snackbar snackbar = Snackbar.make(mSettingsPreferenceFragment.getView(),
+                    getString(R.string.snackbar_text_first_run), Snackbar.LENGTH_INDEFINITE);
+            snackbar.setAction(getString(R.string.snackbar_action_text_first_run), new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onBackPressed();
+                }
+            });
+            snackbar.show();
         }
     }
 }
