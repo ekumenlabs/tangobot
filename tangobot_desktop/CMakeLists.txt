@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(navigation_setup)
+project(tangobot_desktop)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS

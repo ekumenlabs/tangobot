@@ -3,7 +3,7 @@
  -->
 
 <launch>
-  <include file="$(find navigation_setup)/launch/tools/robot_model_bringup.launch">
+  <include file="$(find std_turtlebot)/launch/tools/robot_model_bringup.launch">
     <arg name="3d_sensor" value="kinect" />
   </include>
   

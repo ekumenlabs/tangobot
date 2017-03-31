@@ -10,6 +10,7 @@ Follow these steps to get your robot up and navigating in an empty map, using a 
 
 ## Pre requisites
 You will need to have Ubuntu 14.04 & ROS Indigo or Ubuntu 16.04 & ROS Kinetic. You can check [Installing ROS](https://github.com/ekumenlabs/tangobot#installing-ros) section if you don't have ROS installed.
+For these instructions, we will assume ROS Kinetic; replace kinetic by indigo if that's not your case when necessary.
 
 ### Software & robot setup
 To get the robot up and running without needing to build the app from source, install Tangobot app from Google's Play Store in your device.
@@ -26,9 +27,10 @@ git clone https://github.com/ekumenlabs/tangobot
 Then, install the package dependencies in case you don't have them, and source the environment:
 ```
 cd ~/tangobot_ws
-catkin_make --pkg navigation_setup
-rosdep install navigation_setup -r
-source devel/setup.bash
+source /opt/ros/kinetic/setup.bash
+rosdep update
+rosdep install --from-src tangobot_desktop
+catkin_make --pkg tangobot_desktop
 ```
 
 Connect your device to your robot base using a "USB on the go" cable. The device's main camera should have the same direction of the robot's front. You can check the robot's wiki article for more information about the [hardware setup](http://wiki.ros.org/tangobot/tutorials/kinetic/hardware%20setup) and how to place the Android device over the robot.
@@ -44,22 +46,14 @@ export ROS_IP=YOUR_COMPUTER_IP_ADDRESS
 Then, run the visualizer:
 
 ```
-roslaunch navigation_setup tangobot_demo_visualizer.launch
+roslaunch tangobot_desktop tangobot_demo_visualizer.launch
 ```
 
 You should now see the robot in the center of an empty map in RVIZ. You can now send goal poses from there to navigate.
 
-### Running the navigation stack in your computer
-You may choose to run the navigation stack in your computer optionally, instead of running it in your Android device. 
-Instead of running the final script described above, try this one out after running the app in your Tango device:
-```
-roslaunch navigation_setup tangobot_navigation_bringup.launch
-```
-
 # Building the application from source
 ## Pre requisites
 To build the application, we assume a clean installation of Ubuntu 16.04 in combination with ROS Kinetic; it should also work in Ubuntu 14.04 & ROS Indigo.
-For these instructions, we will assume ROS Kinetic; replace kinetic by indigo if that's not your case.
 
 ### Installing ROS
 Run the following commands to install ROS in your system (taken from [this guide](http://wiki.ros.org/kinetic/Installation/Ubuntu)). Full desktop installation is recommended:

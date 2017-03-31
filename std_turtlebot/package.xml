@@ -36,8 +36,6 @@
 
   <run_depend>kobuki_ftdi</run_depend>
 
-  <run_depend>navigation_setup</run_depend>
-
   <export>
   </export>
 </package>
