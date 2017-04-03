@@ -29,7 +29,7 @@ Then, install the package dependencies in case you don't have them, and source t
 cd ~/tangobot_ws
 source /opt/ros/kinetic/setup.bash
 rosdep update
-rosdep install --from-src tangobot_desktop
+rosdep install --from-paths src/tangobot/tangobot_desktop
 catkin_make --pkg tangobot_desktop
 ```
 
