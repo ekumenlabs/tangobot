@@ -364,7 +364,6 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
                 }
             }
         }.start();
-
     }
 
     @Override
