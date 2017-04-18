@@ -1,9 +1,13 @@
 # tangobot
-An Android application integrating Robot platforms ([Kobuki](https://kobuki.yujinrobot.com/)) with Tango enabled device ([Yellowstone tablets](https://developers.google.com/tango/hardware/tablet)) and ROS.
-The aim of this application is to enable a robot to navigate running all the required code on Android.
+
+An Android application integrating a mobile base ([Kobuki](https://kobuki.yujinrobot.com/)) with a Tango enabled device ([Yellowstone tablets](https://developers.google.com/tango/hardware/tablet)) and ROS.
+The aim of this application is to show how to enable a robot to navigate running all the required code on Android.
+
+This work is developed by [Ekumen](http://www.ekumenlabs.com/) in collaboration with [Intermodalics](http://www.intermodalics.eu/) and [Google Tango](https://get.google.com/tango/).
+Do not hesitate to give us feedback if something is broken or if you think it lacks some features. The best way to do this is by adding issues to this repository.
 
 # Kickstart
-We encourage you to read the robot's [wiki entry](http://wiki.ros.org/Robots/Tangobot) for more information about the required hardware components and detailed setup tutorials. 
+We encourage you to read the robot's [wiki entry](http://wiki.ros.org/Robots/Tangobot) for more information about the required hardware components and step-by-step tutorials.
 
 # Running the app demo
 Follow these steps to get your robot up and navigating in an empty map, using a computer for visualization and for sending goals. We assume you have all the required [hardware components](http://wiki.ros.org/tangobot/tutorials/kinetic/hardware%20setup).
@@ -14,7 +18,7 @@ For these instructions, we will assume ROS Kinetic; replace kinetic by indigo if
 
 ### Software & robot setup
 To get the robot up and running without needing to build the app from source, install Tangobot app from Google's Play Store in your device.
-You will also need to get a helper package in your computer to launch the visualizer. 
+You will also need to get a helper package in your computer to launch the visualizer.
 
 First, clone the Tangobot respository:
 
@@ -36,7 +40,7 @@ catkin_make --pkg tangobot_desktop
 Connect your device to your robot base using a "USB on the go" cable. The device's main camera should have the same direction of the robot's front. You can check the robot's wiki article for more information about the [hardware setup](http://wiki.ros.org/tangobot/tutorials/kinetic/hardware%20setup) and how to place the Android device over the robot.
 
 ## Starting the demo!
-First, start a ROS Master from a separate terminal by running `roscore`. Launch the application in your Android device, and specify your PC's IP address to connect to the ROS master (you may optionally run the ROS master on the device directly; for this example we will assume that the ROS master is running on your computer). 
+First, start a ROS Master from a separate terminal by running `roscore`. Launch the application in your Android device, and specify your PC's IP address to connect to the ROS master (you may optionally run the ROS master on the device directly; for this example we will assume that the ROS master is running on your computer).
 
 Before running the visualizer, ensure your network is properly configured. To do so, run the following command (you can check your system's IP address running `ifconfig`):
 ```
