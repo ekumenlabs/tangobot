@@ -1,6 +1,6 @@
 # tangobot
 
-An Android application integrating a mobile base ([Kobuki](https://kobuki.yujinrobot.com/)) with a Tango enabled device ([Yellowstone tablets](https://developers.google.com/tango/hardware/tablet)) and ROS.
+An Android application integrating a mobile base ([Kobuki](https://kobuki.yujinrobot.com/)) with a Tango enabled device ([Lenvo Phab 2 Pro](http://www3.lenovo.com/us/en/smart-devices/-lenovo-smartphones/phab-series/c/phab-series)) and ROS.
 The aim of this application is to show how to enable a robot to navigate running all the required code on Android.
 
 This work is developed by [Ekumen](http://www.ekumenlabs.com/) in collaboration with [Intermodalics](http://www.intermodalics.eu/) and [Google Tango](https://get.google.com/tango/).
