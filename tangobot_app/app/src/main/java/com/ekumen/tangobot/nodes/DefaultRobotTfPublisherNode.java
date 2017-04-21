@@ -28,6 +28,26 @@ import org.ros.rosjava_geometry.Vector3;
 public class DefaultRobotTfPublisherNode extends ExtrinsicsTfPublisherNode {
     public static final String NODE_NAME = "robot_extrinsics_publisher";
 
+    // This works for the Tango Development Kit tablet, placed over the kit dock as shown
+    // in the Tangobot wiki: http://wiki.ros.org/tangobot/tutorials/kinetic/hardware%20setup
+    public static final Transform TRANSFORM_DEVKIT = new Transform(
+            new Vector3(0, -0.4771263, -0.14950081),
+            new Quaternion(-0.41862823, 0.41862823, 0.56986876, 0.56986876));
+
+    // This works for the Lenovo Phab 2 Pro, positioned on a 3D printed mount as shown
+    // in the Tangobot wiki: http://wiki.ros.org/tangobot/tutorials/kinetic/hardware%20setup
+    public static final Transform TRANSFORM_PHAB2PRO = new Transform(
+            new Vector3(0, -0.05, 0.1),
+            new Quaternion(0, 0.707, 0, 0.707));
+
+    // Identity transform, only for debugging and error cases.
+    public static final Transform TRANSFORM_IDENTITY = new Transform(
+            new Vector3(0, 0, 0),
+            new Quaternion(0, 0, 0, 1));
+
+    // Transformation between device and start of service frames to use.
+    private final Transform deviceMountTransform;
+
     /*
      * Two corrections are applied to complement Tango frames, so that a complete transformation between
      * /odom and /base_footprint can be constructed.
@@ -38,9 +58,15 @@ public class DefaultRobotTfPublisherNode extends ExtrinsicsTfPublisherNode {
      * to the right of the robot, Y pointing to the front, and Z pointing to the back (these last two rotated by the dock). Then, the
      * second correction will correct the dock's angle, and the axis orientation difference (robot's front is X axis, not Y).
      * Apart from that, the height at which the device is placed is accounted in both transformations.
+     *
+     * @param deviceMountTransform  Which transform to use from device to base_footprint. This
+     *          depends on the device used and the way it is mounted on the robot. Two constants
+     *          TRANSFORM_DEVKIT and TRANSFORM_PHAB2PRO are provided with known transform based on
+     *          the Tangobot tutorial.
      */
-    public DefaultRobotTfPublisherNode() {
+    public DefaultRobotTfPublisherNode(Transform deviceMountTransform) {
         super();
+        this.deviceMountTransform = deviceMountTransform;
 
         // odom --> start_of_service transformation
         // This transformation accounts initial orientation and dock height with respect to the ground.
@@ -55,9 +81,7 @@ public class DefaultRobotTfPublisherNode extends ExtrinsicsTfPublisherNode {
         // device --> base_footprint transformation
         // This transformation accounts dock inclination and placement over the robot.
         addTransformation(
-                new Transform(
-                        new Vector3(0, -0.4771263, -0.14950081),
-                        new Quaternion(-0.41862823, 0.41862823, 0.56986876, 0.56986876)),
+                deviceMountTransform,
                 "device",
                 "base_footprint"
         );
