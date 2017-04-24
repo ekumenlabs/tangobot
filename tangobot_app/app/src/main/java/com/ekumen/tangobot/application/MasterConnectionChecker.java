@@ -29,10 +29,10 @@ import java.net.URISyntaxException;
 public class MasterConnectionChecker {
 
     public static final String TAG = "master_checker";
-    protected UserHook userHook;
-    protected String uri;
+    protected UserHook mUserHook;
+    protected String mUri;
 
-    private Object onSuccessPayload;
+    private Object mOnSuccessPayload;
 
     // Lookup text for catching a ConnectionException when attempting to connect to a master.
     private static final String CONNECTION_EXCEPTION_TEXT = "ECONNREFUSED";
@@ -45,9 +45,9 @@ public class MasterConnectionChecker {
     }
 
     public MasterConnectionChecker(String uri, UserHook hook, Object onSuccessPayload) {
-        userHook = hook;
-        this.uri = uri;
-        this.onSuccessPayload = onSuccessPayload;
+        mUserHook = hook;
+        mUri = uri;
+        mOnSuccessPayload = onSuccessPayload;
     }
 
     public interface UserHook {
@@ -67,7 +67,7 @@ public class MasterConnectionChecker {
             Throwable errorResult = null;
             try {
                 Log.i(TAG, "Trying to reach master...");
-                MasterClient masterClient = new MasterClient(new URI(uri));
+                MasterClient masterClient = new MasterClient(new URI(mUri));
                 masterClient.getUri(GraphName.of("android/master_chooser_activity"));
                 Log.i(TAG, "Connected!");
             } catch (URISyntaxException e) {
@@ -87,8 +87,8 @@ public class MasterConnectionChecker {
                 errorResult = e;
             }
 
-            if (errorResult != null && userHook != null) {
-                userHook.onError(errorResult);
+            if (errorResult != null && mUserHook != null) {
+                mUserHook.onError(errorResult);
             }
             // Return true if there was no error at all
             return errorResult == null;
@@ -96,8 +96,8 @@ public class MasterConnectionChecker {
 
         @Override
         protected void onPostExecute(Boolean result) {
-            if (result && userHook != null) {
-                userHook.onSuccess(onSuccessPayload);
+            if (result && mUserHook != null) {
+                mUserHook.onSuccess(mOnSuccessPayload);
             }
         }
     }

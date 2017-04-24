@@ -46,7 +46,7 @@ public class DefaultRobotTfPublisherNode extends ExtrinsicsTfPublisherNode {
             new Quaternion(0, 0, 0, 1));
 
     // Transformation between device and start of service frames to use.
-    private final Transform deviceMountTransform;
+    private final Transform mDeviceMountTransform;
 
     /*
      * Two corrections are applied to complement Tango frames, so that a complete transformation between
@@ -66,7 +66,7 @@ public class DefaultRobotTfPublisherNode extends ExtrinsicsTfPublisherNode {
      */
     public DefaultRobotTfPublisherNode(Transform deviceMountTransform) {
         super();
-        this.deviceMountTransform = deviceMountTransform;
+        mDeviceMountTransform = deviceMountTransform;
 
         // odom --> start_of_service transformation
         // This transformation accounts initial orientation and dock height with respect to the ground.

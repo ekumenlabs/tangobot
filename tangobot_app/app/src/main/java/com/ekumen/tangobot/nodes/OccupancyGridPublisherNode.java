@@ -29,10 +29,10 @@ import nav_msgs.OccupancyGrid;
 public class OccupancyGridPublisherNode extends AbstractNodeMain {
     public static final String NODE_NAME = "occupancy_grid_publisher";
     private Publisher<OccupancyGrid> mPublisher;
-    private OccupancyGridGenerator gridGenerator;
+    private OccupancyGridGenerator mGridGenerator;
 
     public OccupancyGridPublisherNode(OccupancyGridGenerator generator) {
-        gridGenerator = generator;
+        mGridGenerator = generator;
     }
 
     @Override
@@ -49,9 +49,9 @@ public class OccupancyGridPublisherNode extends AbstractNodeMain {
 
         OccupancyGrid message = mPublisher.newMessage();
 
-        gridGenerator.fillHeader(message.getHeader());
-        gridGenerator.fillInformation(message.getInfo());
-        message.setData(gridGenerator.generateData());
+        mGridGenerator.fillHeader(message.getHeader());
+        mGridGenerator.fillInformation(message.getInfo());
+        message.setData(mGridGenerator.generateData());
         mPublisher.publish(message);
     }
 }

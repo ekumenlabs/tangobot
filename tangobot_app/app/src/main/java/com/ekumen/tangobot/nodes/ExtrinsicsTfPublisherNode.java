@@ -46,16 +46,16 @@ public class ExtrinsicsTfPublisherNode extends AbstractNodeMain {
 
     private NodeConfiguration mNodeConfiguration = NodeConfiguration.newPrivate();
     protected MessageFactory mMessageFactory = mNodeConfiguration.getTopicMessageFactory();
-    protected Publisher<TFMessage> tfPublisher;
-    private List<TransformStamped> tfsList = new ArrayList<>();
-    private int publishRate = 100;
+    protected Publisher<TFMessage> mTfPublisher;
+    private List<TransformStamped> mTfList = new ArrayList<>();
+    private int mPublishRate = 100;
 
     public ExtrinsicsTfPublisherNode() {}
 
     public ExtrinsicsTfPublisherNode(List<TransformStamped> tfsList, int publishRate) {
         Preconditions.checkNotNull(tfsList);
-        this.tfsList = tfsList;
-        setPublishRate(publishRate);
+        mTfList = tfsList;
+        setmPublishRate(publishRate);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class ExtrinsicsTfPublisherNode extends AbstractNodeMain {
     @Override
     public void onStart(ConnectedNode connectedNode) {
         super.onStart(connectedNode);
-        tfPublisher = connectedNode.newPublisher("/tf", TFMessage._TYPE);
+        mTfPublisher = connectedNode.newPublisher("/tf", TFMessage._TYPE);
 
         startPublishing(connectedNode);
     }
@@ -88,7 +88,7 @@ public class ExtrinsicsTfPublisherNode extends AbstractNodeMain {
         tfs.setChildFrameId(childFrame);
 
         transform.toTransformMessage(tfs.getTransform());
-        tfsList.add(tfs);
+        mTfList.add(tfs);
         return tfs;
     }
 
@@ -97,40 +97,40 @@ public class ExtrinsicsTfPublisherNode extends AbstractNodeMain {
      * @param tfsIndex Transformation reference to remove.
      */
     public void removeTransformation(Object tfsIndex) {
-        tfsList.remove(tfsIndex);
+        mTfList.remove(tfsIndex);
     }
 
     /**
      * Clears all transformations from the list
      */
     public void removeAllTransformations() {
-        tfsList.clear();
+        mTfList.clear();
     }
 
     /**
      * Sets publish rate [Hz] for all the previously added transformations.
      * @param publishRate Rate in Hz to publish the transformations.
      */
-    public void setPublishRate(int publishRate) {
+    public void setmPublishRate(int publishRate) {
         Preconditions.checkArgument(publishRate > 0);
-        this.publishRate = publishRate;
+        publishRate = publishRate;
     }
 
     private void startPublishing(ConnectedNode connectedNode) {
         connectedNode.executeCancellableLoop(new CancellableLoop() {
             @Override
             protected void loop() throws InterruptedException {
-                WallTimeRate rate = new WallTimeRate(publishRate);
+                WallTimeRate rate = new WallTimeRate(mPublishRate);
 
-                if (!tfsList.isEmpty()) {
+                if (!mTfList.isEmpty()) {
                     Time time = Time.fromMillis(System.currentTimeMillis());
-                    for (TransformStamped tfs : tfsList) {
+                    for (TransformStamped tfs : mTfList) {
                         tfs.getHeader().setStamp(time);
                     }
 
-                    TFMessage tfm = tfPublisher.newMessage();
-                    tfm.setTransforms(tfsList);
-                    tfPublisher.publish(tfm);
+                    TFMessage tfm = mTfPublisher.newMessage();
+                    tfm.setTransforms(mTfList);
+                    mTfPublisher.publish(tfm);
                 }
                 rate.sleep();
             }
