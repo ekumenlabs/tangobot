@@ -24,7 +24,7 @@ import org.ros.node.Node;
 
 public class MoveBaseNode extends NativeNodeMain {
     public static final String NODE_NAME = "move_base";
-    private Log log;
+    private Log mLog;
 
     public MoveBaseNode() {
         super("move_base_jni");
@@ -43,14 +43,14 @@ public class MoveBaseNode extends NativeNodeMain {
 
     @Override
     public void onStart(ConnectedNode connectedNode) {
-        log = connectedNode.getLog();
+        mLog = connectedNode.getLog();
         super.onStart(connectedNode);
     }
 
     @Override
     public void onError(Node node, Throwable throwable) {
-        if (super.executeReturnCode != 0 && log != null) {
-            log.error("Execute error code: " + Integer.toString(super.executeReturnCode), throwable);
+        if (super.executeReturnCode != 0 && mLog != null) {
+            mLog.error("Execute error code: " + Integer.toString(super.executeReturnCode), throwable);
         }
     }
 }

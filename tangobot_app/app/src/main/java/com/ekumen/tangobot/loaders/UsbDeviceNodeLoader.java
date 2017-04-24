@@ -36,16 +36,16 @@ import java.util.List;
  * @author jcerruti@ekumenlabs.com (Julian Cerruti)
  */
 public abstract class UsbDeviceNodeLoader {
-    protected final NodeMainExecutor nodeMainExecutor;
-    protected final URI rosMasterUri;
-    protected final String rosHostname;
+    protected final NodeMainExecutor mNodeMainExecutor;
+    protected final URI mRosMasterUri;
+    protected final String mRosHostname;
 
     Log log = LogFactory.getLog(getClass().getName());
 
     public UsbDeviceNodeLoader(NodeMainExecutor nme, URI rosMasterUri, String rosHostname) {
-        this.nodeMainExecutor = nme;
-        this.rosHostname = rosHostname;
-        this.rosMasterUri = rosMasterUri;
+        mNodeMainExecutor = nme;
+        mRosHostname = rosHostname;
+        mRosMasterUri = rosMasterUri;
     }
 
     public abstract NodeMain[] startNodes(UsbDevice device, UsbManager usbManager) throws Exception;

@@ -49,7 +49,7 @@ public abstract class MasterChooserSettingsActivity extends AppCompatPreferenceA
      * False if the application hasn't executed {@link #onBackPressed()} during this session
      * (i.e., settings weren't applied yet), false otherwise.
      */
-    private static boolean settingsApplied = false;
+    private static boolean sSettingsApplied = false;
 
     /**
      * A preference value change listener that updates the preference's summary
@@ -151,10 +151,10 @@ public abstract class MasterChooserSettingsActivity extends AppCompatPreferenceA
 
     @Override
     public void onBackPressed() {
-        // Attempt master connection only on first run of this activity.
-        if (!settingsApplied) {
+        // Attempt master connection only on first run of this mActivity.
+        if (!sSettingsApplied) {
             masterConnectionAttemptSetup();
-            settingsApplied = true;
+            sSettingsApplied = true;
         }
 
         super.onBackPressed();
@@ -174,6 +174,6 @@ public abstract class MasterChooserSettingsActivity extends AppCompatPreferenceA
     }
 
     protected boolean settingsWereAppliedThisSession() {
-        return settingsApplied;
+        return sSettingsApplied;
     }
 }

@@ -29,23 +29,23 @@ import android.widget.ImageView;
  * It depends on indicators.xml, which specifies arrays with the image/ color to use in each case.
  */
 public class ModuleStatusIndicator {
-    protected Activity activity;
-    protected ImageView imageView;
-    protected Status status;
+    protected Activity mActivity;
+    protected ImageView mImageView;
+    protected Status mStatus;
 
     private static final int RESOURCE_INDEX = 0;
     @StyleableRes private static final int COLOR_INDEX = 1;
 
     ModuleStatusIndicator(Activity activity, ImageView view) {
-        this.activity = activity;
-        this.imageView = view;
-        this.status = Status.PAUSED;
+        mActivity = activity;
+        mImageView = view;
+        mStatus = Status.PAUSED;
         switchStatusDisplay();
     }
 
     public void updateStatus(Status status) {
-        if (this.status != status) {
-            this.status = status;
+        if (mStatus != status) {
+            mStatus = status;
             switchStatusDisplay();
         }
     }
@@ -56,33 +56,33 @@ public class ModuleStatusIndicator {
      * It should have one array for each state, and each array should have a drawable resource and a color resource (in that order).
      */
     private void switchStatusDisplay() {
-        activity.runOnUiThread(new Runnable() {
+        mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 TypedArray img = null;
 
-                switch (status) {
+                switch (mStatus) {
                     case PAUSED:
-                        img = activity.getResources().obtainTypedArray(R.array.status_paused);
+                        img = mActivity.getResources().obtainTypedArray(R.array.status_paused);
                         break;
 
                     case OK:
-                        img = activity.getResources().obtainTypedArray(R.array.status_running);
+                        img = mActivity.getResources().obtainTypedArray(R.array.status_running);
                         break;
 
                     case LOADING:
-                        img = activity.getResources().obtainTypedArray(R.array.status_loading);
+                        img = mActivity.getResources().obtainTypedArray(R.array.status_loading);
                         break;
 
                     case ERROR:
-                        img = activity.getResources().obtainTypedArray(R.array.status_error);
+                        img = mActivity.getResources().obtainTypedArray(R.array.status_error);
                         break;
                 }
 
-                int color = img.getColor(COLOR_INDEX, activity.getResources().getColor(android.R.color.black));
+                int color = img.getColor(COLOR_INDEX, mActivity.getResources().getColor(android.R.color.black));
                 Drawable drawable = img.getDrawable(RESOURCE_INDEX);
-                imageView.setImageDrawable(drawable);
-                drawable = DrawableCompat.wrap(imageView.getDrawable().mutate());
+                mImageView.setImageDrawable(drawable);
+                drawable = DrawableCompat.wrap(mImageView.getDrawable().mutate());
                 DrawableCompat.setTint(drawable, color);
                 img.recycle();
             }

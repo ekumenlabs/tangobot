@@ -26,6 +26,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatDelegate;
@@ -58,6 +59,7 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeListener;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
+import org.ros.rosjava_geometry.Transform;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -319,7 +321,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         mNodeMainExecutor.execute(mMapExtrinsicsTfPublisherNode, nodeConfiguration);
 
         nodeConfiguration.setNodeName(DefaultRobotTfPublisherNode.NODE_NAME);
-        mRobotExtrinsicsTfPublisherNode = new DefaultRobotTfPublisherNode();
+        mRobotExtrinsicsTfPublisherNode = new DefaultRobotTfPublisherNode(getDeviceTransform());
         mNodeMainExecutor.execute(mRobotExtrinsicsTfPublisherNode, nodeConfiguration);
     }
 
@@ -554,6 +556,23 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
             mLog.info(latchName + " latch released!");
         } catch (InterruptedException ie) {
             mLog.warn("Warning: continuing before " + latchName + " latch was released");
+        }
+    }
+
+    /**
+     * Chooses a device extrinsics configuration publisher according to the detected device
+     * type. NOTE: you want to tailor this for your particular robot configuration.
+     */
+    public Transform getDeviceTransform() {
+        if (Build.DEVICE.equalsIgnoreCase("PB2PRO")) {
+            mLog.info("Lenovo Phab2Pro detected. Using default Tangobot tutorial configuration.");
+            return DefaultRobotTfPublisherNode.TRANSFORM_PHAB2PRO;
+        } else if (Build.DEVICE.equalsIgnoreCase("yellowstone")) {
+            mLog.info("Tango Development Kit detected. Using default Tangobot tutorial configuration.");
+            return DefaultRobotTfPublisherNode.TRANSFORM_DEVKIT;
+        } else {
+            mLog.warn("Couldn't identify device automatically. Will publish an identity transform.");
+            return DefaultRobotTfPublisherNode.TRANSFORM_IDENTITY;
         }
     }
 }

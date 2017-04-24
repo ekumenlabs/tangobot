@@ -40,7 +40,7 @@ import java.net.URI;
  * @author jcerruti@ekumenlabs.com (Julian Cerruti)
  */
 public abstract class AbstractBaseNodeLoader extends UsbDeviceNodeLoader {
-    private BaseControllerNode baseControllerNode;
+    private BaseControllerNode mBaseControllerNode;
     private BaseOdomPublisher baseOdomPublisher;
 
     public AbstractBaseNodeLoader(NodeMainExecutor nme, URI rosMasterUri, String rosHostname) {
@@ -72,12 +72,12 @@ public abstract class AbstractBaseNodeLoader extends UsbDeviceNodeLoader {
 
         // Create the ROS nodes
         log.info("Create base controller node");
-        baseControllerNode = new BaseControllerNode(baseDevice, "/cmd_vel");
-        NodeConfiguration baseControllerNodeConf = NodeConfiguration.newPublic(rosHostname);
+        mBaseControllerNode = new BaseControllerNode(baseDevice, "/cmd_vel");
+        NodeConfiguration baseControllerNodeConf = NodeConfiguration.newPublic(mRosHostname);
         baseControllerNodeConf.setNodeName(GraphName.of("base_controller"));
-        baseControllerNodeConf.setMasterUri(rosMasterUri);
-        nodeMainExecutor.execute(baseControllerNode, baseControllerNodeConf);
+        baseControllerNodeConf.setMasterUri(mRosMasterUri);
+        mNodeMainExecutor.execute(mBaseControllerNode, baseControllerNodeConf);
 
-        return new NodeMain[]{ baseControllerNode, baseOdomPublisher };
+        return new NodeMain[]{mBaseControllerNode, baseOdomPublisher };
     }
 }
