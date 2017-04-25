@@ -41,7 +41,7 @@ import java.net.URI;
  */
 public abstract class AbstractBaseNodeLoader extends UsbDeviceNodeLoader {
     private BaseControllerNode mBaseControllerNode;
-    private BaseOdomPublisher baseOdomPublisher;
+    private BaseOdomPublisher mBaseOdomPublisher;
 
     public AbstractBaseNodeLoader(NodeMainExecutor nme, URI rosMasterUri, String rosHostname) {
         super(nme, rosMasterUri, rosHostname);
@@ -78,6 +78,6 @@ public abstract class AbstractBaseNodeLoader extends UsbDeviceNodeLoader {
         baseControllerNodeConf.setMasterUri(mRosMasterUri);
         mNodeMainExecutor.execute(mBaseControllerNode, baseControllerNodeConf);
 
-        return new NodeMain[]{mBaseControllerNode, baseOdomPublisher };
+        return new NodeMain[]{mBaseControllerNode, mBaseOdomPublisher};
     }
 }
