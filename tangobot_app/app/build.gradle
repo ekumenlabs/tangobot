@@ -1,76 +1,80 @@
 /*
- * Copyright (C) 2014 Juan Ignacio Ubeira.
+ * Copyright 2017 Ekumen, Inc. All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 apply plugin: 'com.android.application'
 
 android {
-  compileSdkVersion 25
-  buildToolsVersion "25.0.2"
-  defaultConfig {
-    minSdkVersion 15
-    targetSdkVersion 22
-    versionCode 1
-    versionName "1.0"
-  }
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
 
-  lintOptions {
-    abortOnError = false
-  }
-
-  externalNativeBuild {
-    ndkBuild {
-      path 'src/main/cpp/Android.mk'
+    defaultConfig {
+        applicationId "com.ekumen.tangobot"
+        minSdkVersion 15
+        targetSdkVersion 22
+        versionName project.catkin.pkg.version
+        // NOTE: This code needs to be updated manually on every new version
+        // release
+        versionCode 1
     }
-  }
 
-  defaultConfig {
-    ndk {
-      // Specifies the ABI configurations of your native
-      // libraries Gradle should build and package with your APK.
-      abiFilters 'armeabi-v7a'
+    lintOptions {
+        abortOnError = false
     }
-  }
+
+    externalNativeBuild {
+        ndkBuild {
+            path 'src/main/cpp/Android.mk'
+        }
+    }
+
+    defaultConfig {
+        ndk {
+            // Specifies the ABI configurations of your native
+            // libraries Gradle should build and package with your APK.
+            abiFilters 'armeabi-v7a'
+        }
+    }
 }
 
 dependencies {
-  compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(dir: 'libs', include: ['*.jar'])
 
-  // Rosjava dependencies
-  compile('org.ros.android_core:android_10:[0.3, 0.4)') {
-    exclude group: 'junit'
-    exclude group: 'xml-apis'
-    exclude group: 'org.ros.rosjava_core'
-  }
+    // Rosjava dependencies
+    compile('org.ros.android_core:android_10:[0.3, 0.4)') {
+        exclude group: 'junit'
+        exclude group: 'xml-apis'
+        exclude group: 'org.ros.rosjava_core'
+    }
 
-  compile 'org.ros.rosjava_core:rosjava:[0.3, 0.4)'
-  compile 'org.ros.rosjava_core:rosjava_geometry:[0.3, 0.4)'
-  compile 'org.ros.rosjava_messages:std_msgs:[0.3,)'
-  compile 'org.ros.rosjava_messages:sensor_msgs:[0.3,)'
-  compile 'org.ros.rosjava_messages:geometry_msgs:[0.3,)'
-  compile 'org.ros.rosjava_core:rosjava_helpers:[0.3, 0.4)'
+    compile 'org.ros.rosjava_core:rosjava:[0.3, 0.4)'
+    compile 'org.ros.rosjava_core:rosjava_geometry:[0.3, 0.4)'
+    compile 'org.ros.rosjava_core:rosjava_helpers:[0.3, 0.4)'
+    compile 'org.ros.rosjava_messages:std_msgs:[0.5,0.6)'
+    compile 'org.ros.rosjava_messages:sensor_msgs:[1.12,1.13)'
+    compile 'org.ros.rosjava_messages:geometry_msgs:[1.12,1.13)'
 
-  // External libraries
-  compile 'com.hoho.android:usb-serial-for-android:[0.2, 0.3)'
-  compile 'com.ekumen.base_controller:base_controller_lib:[0.2, 0.3)'
-  compile 'org.yaml:snakeyaml:[1.17, 1.18)'
+    // External libraries
+    compile 'com.hoho.android:usb-serial-for-android:[0.2, 0.3)'
+    compile 'com.ekumen.base_controller:base_controller_lib:[0.2, 0.3)'
+    compile 'org.yaml:snakeyaml:[1.17, 1.18)'
 
-  // Core Tango node
-  compile 'eu.intermodalics:tango_ros_node:[1.0, 1.1)'
+    // Core Tango node
+    compile 'eu.intermodalics:tango_ros_node:[1.0, 1.1)'
 
-  // Android libraries
-  compile 'com.android.support:support-v4:25.2.0'
-  compile 'com.android.support:design:25.2.0'
+    // Android libraries
+    compile 'com.android.support:support-v4:25.2.0'
+    compile 'com.android.support:design:25.2.0'
 }

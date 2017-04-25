@@ -1,5 +1,5 @@
-/*
- * Copyright 2017 Ekumen, Inc.
+/**
+ * Copyright 2017 Ekumen, Inc.  All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,8 @@ import eu.intermodalics.tango_ros_node.TangoRosNode;
 
 public class MainActivity extends AppCompatRosActivity implements TangoRosNode.CallbackListener {
     private static final String ACTION_USB_PERMISSION = "com.github.rosjava.android.androidp1.USB_PERMISSION";
-    public final static String APP_NAME = "TangoBotApp";
+    public final static String NOTIFICATION_TITLE = "Tangobot";
+    public final static String NOTIFICATION_TICKER = "Tangobot application running. Touch here to initiate shutdown.";
 
     private Log mLog = LogFactory.getLog(MainActivity.class);
     private NodeMainExecutor mNodeMainExecutor = null;
@@ -140,7 +141,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         });
 
     public MainActivity() {
-        super(APP_NAME, APP_NAME, SettingsActivity.class, MASTER_CHOOSER_REQUEST_CODE);
+        super(NOTIFICATION_TICKER, NOTIFICATION_TITLE, SettingsActivity.class, MASTER_CHOOSER_REQUEST_CODE);
         mUsbDeviceLatch = new CountDownLatch(1);
     }
 
