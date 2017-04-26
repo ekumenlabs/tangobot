@@ -38,7 +38,7 @@ public class DefaultRobotTfPublisherNode extends ExtrinsicsTfPublisherNode {
     // in the Tangobot wiki: http://wiki.ros.org/tangobot/tutorials/kinetic/hardware%20setup
     public static final Transform TRANSFORM_PHAB2PRO = new Transform(
             new Vector3(0, -0.05, 0.1),
-            new Quaternion(0, 0.707, 0, 0.707));
+            new Quaternion(0, Math.sqrt(2)/2.0, 0, Math.sqrt(2)/2.0));
 
     // Identity transform, only for debugging and error cases.
     public static final Transform TRANSFORM_IDENTITY = new Transform(
