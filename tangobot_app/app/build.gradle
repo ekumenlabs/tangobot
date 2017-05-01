@@ -27,7 +27,7 @@ android {
         versionName project.catkin.pkg.version
         // NOTE: This code needs to be updated manually on every new version
         // release
-        versionCode 1
+        versionCode 2
     }
 
     lintOptions {
