@@ -46,7 +46,8 @@ public class EmptyMapGenerator implements OccupancyGridGenerator {
     public void fillInformation(MapMetaData information) {
         information.setMapLoadTime(Time.fromMillis(System.currentTimeMillis()));
         Pose origin = information.getOrigin();
-        Vector3.zero().toPointMessage(origin.getPosition());
+        origin.getPosition().setX(-5);
+        origin.getPosition().setY(-5);
         Quaternion.identity().toQuaternionMessage(origin.getOrientation());
         information.setWidth(WIDTH);
         information.setHeight(HEIGHT);
