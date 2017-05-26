@@ -1,2 +1,3 @@
 publish_device_pose: true
 publish_color_camera: true
+publish_laser_scan: true

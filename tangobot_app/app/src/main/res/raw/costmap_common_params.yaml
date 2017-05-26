@@ -22,8 +22,8 @@ obstacle_layer:
   footprint_clearing_enabled: true
   observation_sources: pcloud
   pcloud:
-    data_type: PointCloud2
-    topic: /tango/point_cloud
+    data_type: LaserScan
+    topic: /tango/laser_scan
     marking: true
     clearing: true
     min_obstacle_height: -0.1
