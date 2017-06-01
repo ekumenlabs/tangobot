@@ -51,6 +51,7 @@ import com.ekumen.tangobot.nodes.OccupancyGridPublisherNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.android.AppCompatRosActivity;
+import org.ros.android.RosActivity;
 import org.ros.helpers.ParameterLoaderNode;
 import org.ros.node.ConnectedNode;
 import org.ros.node.DefaultNodeListener;
@@ -67,11 +68,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-import eu.intermodalics.tango_ros_node.TangoInitializationHelper;
-import eu.intermodalics.tango_ros_node.TangoInitializationHelper.DefaultTangoServiceConnection.AfterConnectionCallback;
-import eu.intermodalics.tango_ros_node.TangoRosNode;
+import eu.intermodalics.nodelet_manager.TangoInitializationHelper;
+import eu.intermodalics.nodelet_manager.TangoInitializationHelper.DefaultTangoServiceConnection.AfterConnectionCallback;
+import eu.intermodalics.nodelet_manager.TangoNodeletManager;
 
-public class MainActivity extends AppCompatRosActivity implements TangoRosNode.CallbackListener {
+
+public class MainActivity extends AppCompatRosActivity implements TangoNodeletManager.CallbackListener{
     private static final String ACTION_USB_PERMISSION = "com.github.rosjava.android.androidp1.USB_PERMISSION";
     public final static String NOTIFICATION_TITLE = "Tangobot";
     public final static String NOTIFICATION_TICKER = "Tangobot application running. Touch here to initiate shutdown.";
@@ -80,7 +82,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
     private NodeMainExecutor mNodeMainExecutor = null;
     private TextView mUriTextView;
 
-    // Preferences & settings
+    // Preferences & TangoNodeletManager
     private SharedPreferences mSharedPref;
     private URI mMasterUri;
     private String mHostName;
@@ -95,7 +97,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
     private CountDownLatch mUsbDeviceLatch;
 
     // Nodes
-    private TangoRosNode mTangoRosNode;
+    private TangoNodeletManager mTangoNodeletManager;
     private MoveBaseNode mMoveBaseNode;
     private ParameterLoaderNode mParameterLoaderNode;
     private ExtrinsicsTfPublisherNode mRobotExtrinsicsTfPublisherNode;
@@ -438,20 +440,21 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
     }
 
     public void startTangoRosNode() {
+
         mTangoStatusIndicator.updateStatus(ModuleStatusIndicator.Status.LOADING);
         NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
         nodeConfiguration.setMasterUri(mMasterUri);
         nodeConfiguration.setNodeName("TangoRosNode");
 
         // Create and start Tango ROS Node
-        nodeConfiguration.setNodeName(TangoRosNode.NODE_NAME);
+        nodeConfiguration.setNodeName(TangoNodeletManager.NODE_NAME);
         if (TangoInitializationHelper.loadTangoSharedLibrary() != TangoInitializationHelper.ARCH_ERROR &&
                 TangoInitializationHelper.loadTangoRosNodeSharedLibrary() != TangoInitializationHelper.ARCH_ERROR) {
-            mTangoRosNode = new TangoRosNode();
-            mTangoRosNode.attachCallbackListener(this);
+            mTangoNodeletManager = new TangoNodeletManager();
+            mTangoNodeletManager.attachCallbackListener(this);
             TangoInitializationHelper.bindTangoService(this, mTangoServiceConnection);
             if (TangoInitializationHelper.isTangoVersionOk()) {
-                mNodeMainExecutor.execute(mTangoRosNode, nodeConfiguration);
+                mNodeMainExecutor.execute(mTangoNodeletManager, nodeConfiguration);
             } else {
                 mLog.error(getString(R.string.tango_version_error));
                 mTangoStatusIndicator.updateStatus(ModuleStatusIndicator.Status.ERROR);
@@ -463,6 +466,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
             displayToastMessage(R.string.tango_lib_error);
         }
     }
+
 
     /**
      * Helper method to display a toast message with the given message.
@@ -489,11 +493,11 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
     }
 
     @Override
-    public void onTangoRosErrorHook(int returnCode) {
-        if (returnCode == TangoRosNode.ROS_CONNECTION_ERROR) {
+    public void onNodeletManagerError(int returnCode) {
+        if (returnCode == TangoNodeletManager.ROS_CONNECTION_ERROR) {
             mLog.error(getString(R.string.ros_init_error));
             displayToastMessage(R.string.ros_init_error);
-        } else if (returnCode < TangoRosNode.SUCCESS) {
+        } else if (returnCode < TangoNodeletManager.SUCCESS) {
             mLog.error(getString(R.string.tango_service_error));
             displayToastMessage(R.string.tango_service_error);
             mTangoStatusIndicator.updateStatus(ModuleStatusIndicator.Status.ERROR);
