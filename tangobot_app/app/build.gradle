@@ -73,7 +73,7 @@ dependencies {
 
     // Core Tango node
     compile 'eu.intermodalics:tango_nodelet_manager:[1.1, 1.2)'
-
+    compile 'eu.intermodalics:tango_ros_common:[1.1, 1.2)'
 
     // Android libraries
     compile 'com.android.support:support-v4:25.2.0'
