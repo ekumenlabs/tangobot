@@ -1,1 +1,6 @@
-publish_device_pose: true
+laser_scan_max_height: 0.03
+laser_scan_min_height: 0.02
+localization_mode: 1
+# This is a workaround to a bug which is solved in tango_ros_node 1.1.1
+publish_pose_on_tf: true
+publish_pose_on_topic: false
