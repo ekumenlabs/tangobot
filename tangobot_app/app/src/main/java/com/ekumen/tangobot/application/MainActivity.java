@@ -51,6 +51,7 @@ import com.ekumen.tangobot.nodes.OccupancyGridPublisherNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.android.AppCompatRosActivity;
+import org.ros.android.RosActivity;
 import org.ros.helpers.ParameterLoaderNode;
 import org.ros.node.ConnectedNode;
 import org.ros.node.DefaultNodeListener;
@@ -64,23 +65,29 @@ import org.ros.rosjava_geometry.Transform;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-import eu.intermodalics.tango_ros_node.TangoInitializationHelper;
-import eu.intermodalics.tango_ros_node.TangoInitializationHelper.DefaultTangoServiceConnection.AfterConnectionCallback;
-import eu.intermodalics.tango_ros_node.TangoRosNode;
+import eu.intermodalics.nodelet_manager.TangoInitializationHelper;
+import eu.intermodalics.nodelet_manager.TangoInitializationHelper.DefaultTangoServiceConnection.AfterConnectionCallback;
+import eu.intermodalics.nodelet_manager.TangoNodeletManager;
+import eu.intermodalics.tango_ros_common.TangoServiceClientNode;
+import tango_ros_messages.TangoConnectRequest;
 
-public class MainActivity extends AppCompatRosActivity implements TangoRosNode.CallbackListener {
+
+public class MainActivity extends AppCompatRosActivity implements TangoServiceClientNode.CallbackListener {
     private static final String ACTION_USB_PERMISSION = "com.github.rosjava.android.androidp1.USB_PERMISSION";
     public final static String NOTIFICATION_TITLE = "Tangobot";
     public final static String NOTIFICATION_TICKER = "Tangobot application running. Touch here to initiate shutdown.";
+
+    public final static int MAX_TANGO_CONNECTION_TRIES = 50;
 
     private Log mLog = LogFactory.getLog(MainActivity.class);
     private NodeMainExecutor mNodeMainExecutor = null;
     private TextView mUriTextView;
 
-    // Preferences & settings
+    // Preferences & TangoNodeletManager
     private SharedPreferences mSharedPref;
     private URI mMasterUri;
     private String mHostName;
@@ -95,7 +102,8 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
     private CountDownLatch mUsbDeviceLatch;
 
     // Nodes
-    private TangoRosNode mTangoRosNode;
+    private TangoNodeletManager mTangoNodeletManager;
+    private TangoServiceClientNode mTangoServiceClient;
     private MoveBaseNode mMoveBaseNode;
     private ParameterLoaderNode mParameterLoaderNode;
     private ExtrinsicsTfPublisherNode mRobotExtrinsicsTfPublisherNode;
@@ -439,19 +447,53 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
 
     public void startTangoRosNode() {
         mTangoStatusIndicator.updateStatus(ModuleStatusIndicator.Status.LOADING);
-        NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
-        nodeConfiguration.setMasterUri(mMasterUri);
-        nodeConfiguration.setNodeName("TangoRosNode");
 
-        // Create and start Tango ROS Node
-        nodeConfiguration.setNodeName(TangoRosNode.NODE_NAME);
         if (TangoInitializationHelper.loadTangoSharedLibrary() != TangoInitializationHelper.ARCH_ERROR &&
                 TangoInitializationHelper.loadTangoRosNodeSharedLibrary() != TangoInitializationHelper.ARCH_ERROR) {
-            mTangoRosNode = new TangoRosNode();
-            mTangoRosNode.attachCallbackListener(this);
+            mTangoNodeletManager = new TangoNodeletManager();
             TangoInitializationHelper.bindTangoService(this, mTangoServiceConnection);
             if (TangoInitializationHelper.isTangoVersionOk()) {
-                mNodeMainExecutor.execute(mTangoRosNode, nodeConfiguration);
+                mLog.info("Tango Core version is supposedly OK, starting Tango node.");
+
+                // ServiceClient node which is responsible for calling ros services.
+                mTangoServiceClient = new TangoServiceClientNode(this);
+                NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
+                nodeConfiguration.setMasterUri(mMasterUri);
+                nodeConfiguration.setNodeName(mTangoServiceClient.getDefaultNodeName());
+                mNodeMainExecutor.execute(mTangoServiceClient, nodeConfiguration);
+
+                // Create and start Tango ROS Node
+                nodeConfiguration.setNodeName(TangoNodeletManager.NODE_NAME);
+                ArrayList<NodeListener> listeners = new ArrayList<>();
+                listeners.add(new DefaultNodeListener() {
+                    @Override
+                    public void onStart(ConnectedNode connectedNode) {
+                        boolean connected = false;
+                        try {
+                            for (int i = 0; i < MAX_TANGO_CONNECTION_TRIES; i++) {
+                                if (mTangoServiceClient.callTangoConnectService(TangoConnectRequest.CONNECT)) {
+                                    connected = true;
+                                    break;
+                                }
+                                mLog.warn("Failed to connect to Tango, attempt " + i);
+                                Thread.sleep(200);
+                            }
+                        } catch (InterruptedException e) {
+                            mLog.warn("Tango connection loop interrupted.", e);
+                        }
+                        if (!connected) {
+                            mLog.error("Failed to connect to Tango.");
+                            mTangoStatusIndicator.updateStatus(ModuleStatusIndicator.Status.ERROR);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Node node, Throwable throwable) {
+                        mLog.error("Error running TangoRosNode", throwable);
+                        mTangoStatusIndicator.updateStatus(ModuleStatusIndicator.Status.ERROR);
+                    }
+                });
+                mNodeMainExecutor.execute(mTangoNodeletManager, nodeConfiguration, listeners);
             } else {
                 mLog.error(getString(R.string.tango_version_error));
                 mTangoStatusIndicator.updateStatus(ModuleStatusIndicator.Status.ERROR);
@@ -486,18 +528,6 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
         }
 
         super.nodeMainExecutorService.forceShutdown();
-    }
-
-    @Override
-    public void onTangoRosErrorHook(int returnCode) {
-        if (returnCode == TangoRosNode.ROS_CONNECTION_ERROR) {
-            mLog.error(getString(R.string.ros_init_error));
-            displayToastMessage(R.string.ros_init_error);
-        } else if (returnCode < TangoRosNode.SUCCESS) {
-            mLog.error(getString(R.string.tango_service_error));
-            displayToastMessage(R.string.tango_service_error);
-            mTangoStatusIndicator.updateStatus(ModuleStatusIndicator.Status.ERROR);
-        }
     }
 
     @Override
@@ -575,5 +605,35 @@ public class MainActivity extends AppCompatRosActivity implements TangoRosNode.C
             mLog.warn("Couldn't identify device automatically. Will publish an identity transform.");
             return DefaultRobotTfPublisherNode.TRANSFORM_IDENTITY;
         }
+    }
+
+    @Override
+    public void onSaveMapServiceCallFinish(boolean b, String s) {
+
+    }
+
+    @Override
+    public void onTangoConnectServiceFinish(int i, String s) {
+
+    }
+
+    @Override
+    public void onTangoDisconnectServiceFinish(int i, String s) {
+
+    }
+
+    @Override
+    public void onTangoReconnectServiceFinish(int i, String s) {
+
+    }
+
+    @Override
+    public void onGetMapUuidsFinish(List<String> list, List<String> list1) {
+
+    }
+
+    @Override
+    public void onTangoStatus(int i) {
+
     }
 }
