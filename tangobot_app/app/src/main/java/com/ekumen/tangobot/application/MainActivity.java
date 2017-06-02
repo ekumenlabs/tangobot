@@ -470,7 +470,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
                     public void onStart(ConnectedNode connectedNode) {
                         boolean connected = false;
                         try {
-                            for (int i=0; i<MAX_TANGO_CONNECTION_TRIES; i++) {
+                            for (int i = 0; i < MAX_TANGO_CONNECTION_TRIES; i++) {
                                 if (mTangoServiceClient.callTangoConnectService(TangoConnectRequest.CONNECT)) {
                                     connected = true;
                                     break;
