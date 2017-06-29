@@ -109,9 +109,10 @@ Then, follow these steps:
 
 * Download Android Studio from [here](https://developer.android.com/studio/index.html), install it, and launch it. 
 * Import the "tangobot_app" directory by clicking file -> new -> import (it should be in ~/tangobot_ws/src/tangobot/tangobot_app).
-* From the tools menu, select Android -> SDK manager. Install SDK versions 25 & 22, as well as Android NDK (this should download NDK > r13).
-* Check whether Android Studio created a local.properties file inside "tangobot_app", and if it contains the proper directories for your recently installed SDK and NDK.
-* Add your SDK directory to your `PATH` environment variable: ```export PATH=$PATH:$HOME/Android/Sdk/ndk-bundle``` (assuming the default path where Android Studio installs it). You may optionally add that line to your ~/.bashrc file to add it permanently.
+* From the tools menu, select Android -> SDK manager. Install SDK versions 25 & 22.
+* Download Android NDK r13b; you can save it in the same directory the SDK is installed. The default is ~/Android/Sdk. You can get the NDK from [NDK release history](https://developer.android.com/ndk/downloads/older_releases.html).
+* Check whether Android Studio created a local.properties file inside "tangobot_app", and if it contains the proper directories for your recently installed SDK. Add a line pointing to the installed NDK as `ndk.dir`.
+* Add your SDK directory to your `PATH` environment variable: ```export PATH=$PATH:$HOME/Android/Sdk/android-ndk-r13b``` (assuming the default path where Android Studio installs it, and that you stored the NDK there). You may optionally add that line to your ~/.bashrc file to add it permanently.
 * Inside the directory `tangobot_app/app/src/main/cpp` create a file named `local-properties.mk`. Add a single line to it: `$(call import-add-path, {your path to your roscpp_android environment}/ros-android-ndk/roscpp_android/output)` (i.e. the output folder of your recently installed `roscpp_android` environment. Use the absolute path without the curly braces).
 
 ## Build and install the app
