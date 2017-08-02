@@ -608,7 +608,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
     }
 
     @Override
-    public void onSaveMapServiceCallFinish(boolean b, String s) {
+    public void onSaveMapServiceCallFinish(boolean b, String s, String t, String u) {
 
     }
 
