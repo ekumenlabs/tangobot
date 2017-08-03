@@ -456,7 +456,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
                 mLog.info("Tango Core version is supposedly OK, starting Tango node.");
 
                 // ServiceClient node which is responsible for calling ros services.
-                mTangoServiceClient = new TangoServiceClientNode(this);
+                mTangoServiceClient = new TangoServiceClientNode();
                 NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
                 nodeConfiguration.setMasterUri(mMasterUri);
                 nodeConfiguration.setNodeName(mTangoServiceClient.getDefaultNodeName());
@@ -472,10 +472,11 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
                         try {
                             for (int i = 0; i < MAX_TANGO_CONNECTION_TRIES; i++) {
                                 if (mTangoServiceClient.callTangoConnectService(TangoConnectRequest.CONNECT)) {
+                                    mLog.debug("Successfully connected to Tango");
                                     connected = true;
                                     break;
                                 }
-                                mLog.warn("Failed to connect to Tango, attempt " + i);
+                                mLog.warn("Failed to connect to Tango, try " + i);
                                 Thread.sleep(200);
                             }
                         } catch (InterruptedException e) {
@@ -608,7 +609,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
     }
 
     @Override
-    public void onSaveMapServiceCallFinish(boolean b, String s) {
+    public void onSaveMapServiceCallFinish(boolean b, String s, String t, String u) {
 
     }
 
@@ -634,6 +635,11 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
 
     @Override
     public void onTangoStatus(int i) {
+
+    }
+
+    @Override
+    public void onLoadOccupancyGridServiceCallFinish(boolean b, String s, boolean b1, String s1) {
 
     }
 }
