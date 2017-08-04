@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
             @Override
             public void execute() {
                 if (TangoInitializationHelper.isTangoServiceBound()) {
-                    mTangoStatusIndicator.updateStatus(ModuleStatusIndicator.Status.OK);
+                    mTangoStatusIndicator.updateStatus(ModuleStatusIndicator.Status.LOADING);
                     mLog.info("Bound to Tango Service");
                 } else {
                     mTangoStatusIndicator.updateStatus(ModuleStatusIndicator.Status.ERROR);
@@ -457,6 +457,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
 
                 // ServiceClient node which is responsible for calling ros services.
                 mTangoServiceClient = new TangoServiceClientNode();
+                mTangoServiceClient.setCallbackListener(this);
                 NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
                 nodeConfiguration.setMasterUri(mMasterUri);
                 nodeConfiguration.setNodeName(mTangoServiceClient.getDefaultNodeName());
@@ -472,7 +473,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
                         try {
                             for (int i = 0; i < MAX_TANGO_CONNECTION_TRIES; i++) {
                                 if (mTangoServiceClient.callTangoConnectService(TangoConnectRequest.CONNECT)) {
-                                    mLog.debug("Successfully connected to Tango");
+                                    mLog.info("Successfully connected to Tango");
                                     connected = true;
                                     break;
                                 }
@@ -635,7 +636,11 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
 
     @Override
     public void onTangoStatus(int i) {
-
+        // NOTE: This status value corresponds to SERVICE_CONNECTED, according to tano_ros_node.h
+        // https://github.com/Intermodalics/tango_ros/blob/v1.3.0/tango_ros_common/tango_ros_native/include/tango_ros_native/tango_ros_node.h#L116
+        if (i == 3) {
+            mTangoStatusIndicator.updateStatus(ModuleStatusIndicator.Status.OK);
+        }
     }
 
     @Override
