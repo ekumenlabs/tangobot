@@ -450,7 +450,15 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
 
         if (TangoInitializationHelper.loadTangoSharedLibrary() != TangoInitializationHelper.ARCH_ERROR &&
                 TangoInitializationHelper.loadTangoRosNodeSharedLibrary() != TangoInitializationHelper.ARCH_ERROR) {
-            mTangoNodeletManager = new TangoNodeletManager();
+
+            // Remap topic names from default Tango ROS Node to those used in the standard
+            // Turtlebot demos and apps.
+            String[] topicMap = {
+                    "/tango/laser_scan:=/scan",
+                    "/tango/camera/color_1/image_raw/compressed:=/compressed_image"
+            };
+
+            mTangoNodeletManager = new TangoNodeletManager(topicMap);
             TangoInitializationHelper.bindTangoService(this, mTangoServiceConnection);
             if (TangoInitializationHelper.isTangoVersionOk()) {
                 mLog.info("Tango Core version is supposedly OK, starting Tango node.");
