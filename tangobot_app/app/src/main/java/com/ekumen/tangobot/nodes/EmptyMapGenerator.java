@@ -32,8 +32,8 @@ import std_msgs.Header;
  * TODO: This should be replaced by a Map Generator that could generate a map grid from an image with metadata.
  */
 public class EmptyMapGenerator implements OccupancyGridGenerator {
-    private static final int WIDTH = 200;
-    private static final int HEIGHT = 200;
+    private static final int WIDTH = 500;
+    private static final int HEIGHT = 500;
     private static final float RESOLUTION = (float) 0.05;
 
     @Override
@@ -45,9 +45,10 @@ public class EmptyMapGenerator implements OccupancyGridGenerator {
     @Override
     public void fillInformation(MapMetaData information) {
         information.setMapLoadTime(Time.fromMillis(System.currentTimeMillis()));
+        // Set the origin to the center of the map
         Pose origin = information.getOrigin();
-        origin.getPosition().setX(-5);
-        origin.getPosition().setY(-5);
+        origin.getPosition().setX(-1 * WIDTH * RESOLUTION / 2);
+        origin.getPosition().setY(-1 * HEIGHT * RESOLUTION / 2);
         Quaternion.identity().toQuaternionMessage(origin.getOrientation());
         information.setWidth(WIDTH);
         information.setHeight(HEIGHT);
