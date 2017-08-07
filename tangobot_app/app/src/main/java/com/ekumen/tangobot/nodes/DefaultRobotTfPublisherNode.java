@@ -68,16 +68,6 @@ public class DefaultRobotTfPublisherNode extends ExtrinsicsTfPublisherNode {
         super();
         mDeviceMountTransform = deviceMountTransform;
 
-        // odom --> start_of_service transformation
-        // This transformation accounts initial orientation and dock height with respect to the ground.
-        addTransformation(
-                new Transform(
-                        new Vector3(0, 0, 0.5),
-                        Quaternion.fromAxisAngle(Vector3.zAxis(), -Math.PI/2)),
-                "odom",
-                "start_of_service"
-        );
-
         // device --> base_footprint transformation
         // This transformation accounts dock inclination and placement over the robot.
         addTransformation(
