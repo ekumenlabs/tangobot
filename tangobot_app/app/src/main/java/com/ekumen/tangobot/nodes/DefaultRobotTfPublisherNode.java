@@ -37,7 +37,7 @@ public class DefaultRobotTfPublisherNode extends ExtrinsicsTfPublisherNode {
     // This works for the Lenovo Phab 2 Pro, positioned on a 3D printed mount as shown
     // in the Tangobot wiki: http://wiki.ros.org/tangobot/tutorials/kinetic/hardware%20setup
     public static final Transform TRANSFORM_PHAB2PRO = new Transform(
-            new Vector3(0, -0.05, 0.1),
+            new Vector3(-0.45, -0.05, 0.1),
             new Quaternion(0, Math.sqrt(2)/2.0, 0, Math.sqrt(2)/2.0));
 
     // Identity transform, only for debugging and error cases.

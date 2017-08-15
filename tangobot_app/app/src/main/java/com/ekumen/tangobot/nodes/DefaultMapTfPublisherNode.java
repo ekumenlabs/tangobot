@@ -35,7 +35,7 @@ public class DefaultMapTfPublisherNode extends ExtrinsicsTfPublisherNode {
         // Using a (x,y) = (0,0) transformation assuming a 10x10 empty map.
         addTransformation(
                 new Transform(
-                        new Vector3(0, 0, 0),
+                        new Vector3(0, 0, 0.45),
                         Quaternion.identity()),
                 "map",
                 "odom"
