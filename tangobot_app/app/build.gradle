@@ -23,7 +23,7 @@ android {
     defaultConfig {
         applicationId "com.ekumen.tangobot"
         minSdkVersion 15
-        targetSdkVersion 22
+        targetSdkVersion 23
         versionName project.catkin.pkg.version
         // NOTE: This code needs to be updated manually on every new version
         // release

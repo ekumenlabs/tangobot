@@ -43,15 +43,14 @@ import com.ekumen.tangobot.loaders.KobukiNodeLoader;
 import com.ekumen.tangobot.loaders.UsbDeviceNodeLoader;
 import com.ekumen.tangobot.nodes.DefaultMapTfPublisherNode;
 import com.ekumen.tangobot.nodes.DefaultRobotTfPublisherNode;
-import com.ekumen.tangobot.nodes.ExtrinsicsTfPublisherNode;
 import com.ekumen.tangobot.nodes.EmptyMapGenerator;
+import com.ekumen.tangobot.nodes.ExtrinsicsTfPublisherNode;
 import com.ekumen.tangobot.nodes.MoveBaseNode;
 import com.ekumen.tangobot.nodes.OccupancyGridPublisherNode;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.android.AppCompatRosActivity;
-import org.ros.android.RosActivity;
 import org.ros.helpers.ParameterLoaderNode;
 import org.ros.node.ConnectedNode;
 import org.ros.node.DefaultNodeListener;
@@ -82,6 +81,15 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
     public final static String NOTIFICATION_TICKER = "Tangobot application running. Touch here to initiate shutdown.";
 
     public final static int MAX_TANGO_CONNECTION_TRIES = 50;
+
+    private static final String REQUEST_TANGO_PERMISSION_ACTION = "android.intent.action.REQUEST_TANGO_PERMISSION";
+    public static final String EXTRA_KEY_PERMISSIONTYPE = "PERMISSIONTYPE";
+    public static final String EXTRA_VALUE_ADF = "ADF_LOAD_SAVE_PERMISSION";
+    private static final String EXTRA_VALUE_DATASET = "DATASET_PERMISSION";
+    private static final int REQUEST_CODE_ADF_PERMISSION = 111;
+    private static final int REQUEST_CODE_DATASET_PERMISSION = 112;
+    private boolean mAdfPermissionHasBeenAnswered;
+    private boolean mDatasetPermissionHasBeenAnswered;
 
     private Log mLog = LogFactory.getLog(MainActivity.class);
     private NodeMainExecutor mNodeMainExecutor = null;
@@ -147,6 +155,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
                 }
             }
         });
+    private CountDownLatch mRosConnectionlatch;
 
     public MainActivity() {
         super(NOTIFICATION_TICKER, NOTIFICATION_TITLE, SettingsActivity.class, MASTER_CHOOSER_REQUEST_CODE);
@@ -205,18 +214,16 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
 
         // Store a reference to the NodeMainExecutor
         mNodeMainExecutor = nodeMainExecutor;
+        getTangoPermission(EXTRA_VALUE_ADF, REQUEST_CODE_ADF_PERMISSION);
+        getTangoPermission(EXTRA_VALUE_DATASET, REQUEST_CODE_DATASET_PERMISSION);
+    }
 
+    protected void startNodes() {
         mMasterUri = getMasterUri();
         mHostName = getRosHostname();
 
         mLog.info(mMasterUri);
         updateMasterUriUI(mMasterUri.toString());
-
-        // Trigger asking permission to access any devices that are already connected
-        UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
-        for (UsbDevice device : manager.getDeviceList().values()) {
-            manager.requestPermission(device, mUsbPermissionIntent);
-        }
 
         checkRosMasterConnection();
         configureParameterServer();
@@ -229,6 +236,34 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
         // Start Tango node and navigation stack.
         startTangoRosNode();
         startMoveBaseNode();
+
+        new Thread() {
+            @Override
+            public void run() {
+                // Trigger asking permission to access any devices that are already connected
+                boolean permissionsTriggered = false;
+
+                while (permissionsTriggered == false) {
+                    mLog.info("Triggering USB permissions");
+                    UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
+                    if (manager.getDeviceList().values().isEmpty()) {
+                        mLog.info("No device found, sleeping and retrying in a while");
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        continue;
+                    }
+
+                    for (UsbDevice device : manager.getDeviceList().values()) {
+                        mLog.info("Requesting permission for device " + device.toString());
+                        manager.requestPermission(device, mUsbPermissionIntent);
+                        permissionsTriggered = true;
+                    }
+                }
+            }
+        }.start();
     }
 
     /**
@@ -237,7 +272,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
      */
     private void checkRosMasterConnection() {
         mRosMasterStatusIndicator.updateStatus(ModuleStatusIndicator.Status.LOADING);
-        CountDownLatch latch = new CountDownLatch(1);
+        mRosConnectionlatch = new CountDownLatch(1);
         new MasterConnectionChecker(mMasterUri.toString(),
                 new MasterConnectionChecker.UserHook() {
                     @Override
@@ -256,9 +291,9 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
                         mRosMasterStatusIndicator.updateStatus(ModuleStatusIndicator.Status.ERROR);
                         displayToastMessage(R.string.ros_init_error);
                     }},
-                latch
+                mRosConnectionlatch
         ).runTest();
-        waitForLatchUnlock(latch, "ROS");
+        waitForLatchUnlock(mRosConnectionlatch, "ROS");
     }
 
     /**
@@ -617,6 +652,41 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
         }
     }
 
+    private void getTangoPermission(String permissionType, int requestCode) {
+        Intent intent = new Intent();
+        intent.setAction(REQUEST_TANGO_PERMISSION_ACTION);
+        intent.putExtra(EXTRA_KEY_PERMISSIONTYPE, permissionType);
+        startActivityForResult(intent, requestCode);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        mLog.info("ON ACTIVITY RESULT CALLED, request code: " + Integer.toString(requestCode) + " result code: " + Integer.toString(resultCode));
+
+        if (requestCode == REQUEST_CODE_ADF_PERMISSION || requestCode == REQUEST_CODE_DATASET_PERMISSION) {
+            if (resultCode == RESULT_CANCELED) {
+                // No Tango permissions granted by the user.
+                displayToastMessage(R.string.tango_permission_denied);
+            }
+            if (requestCode == REQUEST_CODE_ADF_PERMISSION) {
+                // The user answered the ADF permission popup (the permission has not been necessarily granted).
+                mAdfPermissionHasBeenAnswered = true;
+            }
+            if (requestCode == REQUEST_CODE_DATASET_PERMISSION) {
+                // The user answered the dataset permission popup (the permission has not been necessarily granted).
+                mDatasetPermissionHasBeenAnswered = true;
+            }
+            if (mAdfPermissionHasBeenAnswered && mDatasetPermissionHasBeenAnswered) {
+                // Both ADF and dataset permissions popup have been answered by the user, the node
+                // can start.
+                mLog.info("Starting Nodes");
+                startNodes();
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
     @Override
     public void onSaveMapServiceCallFinish(boolean b, String s, String t, String u) {
 
@@ -646,6 +716,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
     public void onTangoStatus(int i) {
         // NOTE: This status value corresponds to SERVICE_CONNECTED, according to tano_ros_node.h
         // https://github.com/Intermodalics/tango_ros/blob/v1.3.0/tango_ros_common/tango_ros_native/include/tango_ros_native/tango_ros_node.h#L116
+        mLog.info("onTangoStatus called: code " + Integer.toString(i));
         if (i == 3) {
             mTangoStatusIndicator.updateStatus(ModuleStatusIndicator.Status.OK);
         }

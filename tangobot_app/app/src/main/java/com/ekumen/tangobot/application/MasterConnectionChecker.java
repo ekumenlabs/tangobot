@@ -87,18 +87,15 @@ public class MasterConnectionChecker {
                 errorResult = e;
             }
 
-            if (errorResult != null && mUserHook != null) {
-                mUserHook.onError(errorResult);
+            if (mUserHook != null) {
+                if (errorResult == null) {
+                    mUserHook.onSuccess(mOnSuccessPayload);
+                } else {
+                    mUserHook.onError(errorResult);
+                }
             }
             // Return true if there was no error at all
             return errorResult == null;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean result) {
-            if (result && mUserHook != null) {
-                mUserHook.onSuccess(mOnSuccessPayload);
-            }
         }
     }
 }
