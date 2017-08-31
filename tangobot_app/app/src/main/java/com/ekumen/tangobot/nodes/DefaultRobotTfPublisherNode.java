@@ -40,6 +40,10 @@ public class DefaultRobotTfPublisherNode extends ExtrinsicsTfPublisherNode {
             new Vector3(-0.45, -0.05, 0.1),
             new Quaternion(0, Math.sqrt(2)/2.0, 0, Math.sqrt(2)/2.0));
 
+    public static final Transform TRANSFORM_ASUS_ZENFONE = new Transform(
+            new Vector3(-0.45, -0.04, 0.12),
+            new Quaternion(0, Math.sqrt(2)/2.0, 0, Math.sqrt(2)/2.0));
+
     // Identity transform, only for debugging and error cases.
     public static final Transform TRANSFORM_IDENTITY = new Transform(
             new Vector3(0, 0, 0),

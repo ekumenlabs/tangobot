@@ -247,7 +247,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
                     mLog.info("Triggering USB permissions");
                     UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
                     if (manager.getDeviceList().values().isEmpty()) {
-                        mLog.info("No device found, sleeping and retrying in a while");
+                        mLog.info("No USB device found, sleeping and retrying in a while");
                         try {
                             Thread.sleep(500);
                         } catch (InterruptedException e) {
@@ -646,8 +646,12 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
         } else if (Build.DEVICE.equalsIgnoreCase("yellowstone")) {
             mLog.info("Tango Development Kit detected. Using default Tangobot tutorial configuration.");
             return DefaultRobotTfPublisherNode.TRANSFORM_DEVKIT;
+        } else if (Build.DEVICE.equalsIgnoreCase("ASUS_A002")) {
+            mLog.info("Asus Zenfone AR detected. Using default Tangobot tutorial configuration.");
+            return DefaultRobotTfPublisherNode.TRANSFORM_ASUS_ZENFONE;
         } else {
-            mLog.warn("Couldn't identify device automatically. Will publish an identity transform.");
+            mLog.warn("Couldn't identify device automatically. Will publish an identity transform; " +
+                    "device is "+ Build.DEVICE);
             return DefaultRobotTfPublisherNode.TRANSFORM_IDENTITY;
         }
     }
