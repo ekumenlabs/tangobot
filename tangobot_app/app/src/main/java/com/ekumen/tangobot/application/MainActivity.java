@@ -61,6 +61,7 @@ import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
 import org.ros.rosjava_geometry.Transform;
 
+import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -88,6 +89,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
     private static final String EXTRA_VALUE_DATASET = "DATASET_PERMISSION";
     private static final int REQUEST_CODE_ADF_PERMISSION = 111;
     private static final int REQUEST_CODE_DATASET_PERMISSION = 112;
+    private static final String TANGO_NAMESPACE = "/tango";
     private boolean mAdfPermissionHasBeenAnswered;
     private boolean mDatasetPermissionHasBeenAnswered;
 
@@ -135,7 +137,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
         add(new Pair<>(R.raw.move_base_params, MoveBaseNode.NODE_NAME));
         add(new Pair<>(R.raw.global_planner_params, MoveBaseNode.NODE_NAME + "/GlobalPlanner"));
         add(new Pair<>(R.raw.navfn_global_planner_params, MoveBaseNode.NODE_NAME + "/NavfnROS"));
-        add(new Pair<>(R.raw.tango_node_params, "/tango"));
+        add(new Pair<>(R.raw.tango_node_params, TANGO_NAMESPACE));
     }};
 
     private ArrayList<ParameterLoaderNode.Resource> mOpenedResources = new ArrayList<>();
@@ -172,6 +174,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
             mOpenedResources.add(new ParameterLoaderNode.Resource(
                     getResources().openRawResource(ip.first.intValue()), ip.second));
         }
+        addRuntimeParameters();
 
         mSharedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
@@ -661,6 +664,13 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
         intent.setAction(REQUEST_TANGO_PERMISSION_ACTION);
         intent.putExtra(EXTRA_KEY_PERMISSIONTYPE, permissionType);
         startActivityForResult(intent, requestCode);
+    }
+
+    private void addRuntimeParameters() {
+        String androidApiLevel = "android_api_level: " + Integer.toString(Build.VERSION.SDK_INT);
+        mLog.info("Adding android API level parameter: " + androidApiLevel);
+        mOpenedResources.add(new ParameterLoaderNode.Resource(
+                new ByteArrayInputStream(androidApiLevel.getBytes()), TANGO_NAMESPACE));
     }
 
     @Override
