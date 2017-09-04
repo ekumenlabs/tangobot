@@ -31,4 +31,5 @@
     <string name="welcome_text_first_run">Welcome to Tangobot app! Please define your settings to continue.</string>
     <string name="snackbar_text_first_run">Click DONE to start after your settings are ready</string>
     <string name="snackbar_action_text_first_run">Done</string>
+    <string name="tango_permission_denied">Tango permission denied! Unable to connect to Tango.</string>
 </resources>

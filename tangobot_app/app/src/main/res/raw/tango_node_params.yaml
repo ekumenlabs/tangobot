@@ -4,4 +4,3 @@ localization_mode: 1
 publish_pose_on_tf: true
 publish_pose_on_topic: false
 start_of_service_frame_id: odom
-
