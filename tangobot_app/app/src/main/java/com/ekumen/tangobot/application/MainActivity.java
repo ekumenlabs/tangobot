@@ -251,6 +251,15 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
         startTangoRosNode();
         startMoveBaseNode();
 
+        requestUSBPermission();
+    }
+
+    /**
+     * Requests USB permissions for connected device.
+     * This method triggers a task that scans the USB port in the background
+     * to support connections after this method has been called the first time.
+     */
+    private void requestUSBPermission() {
         new Thread() {
             @Override
             public void run() {
@@ -694,7 +703,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        mLog.info("ON ACTIVITY RESULT CALLED, request code: " + Integer.toString(requestCode) + " result code: " + Integer.toString(resultCode));
+        mLog.info("onActivityResult - request code: " + Integer.toString(requestCode) + " result code: " + Integer.toString(resultCode));
 
         if (requestCode == REQUEST_CODE_ADF_PERMISSION || requestCode == REQUEST_CODE_DATASET_PERMISSION) {
             if (resultCode == RESULT_CANCELED) {
