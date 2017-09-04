@@ -51,6 +51,8 @@ import com.ekumen.tangobot.nodes.OccupancyGridPublisherNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.android.AppCompatRosActivity;
+import org.ros.android.NodeMainExecutorService;
+import org.ros.android.NodeMainExecutorServiceListener;
 import org.ros.helpers.ParameterLoaderNode;
 import org.ros.node.ConnectedNode;
 import org.ros.node.DefaultNodeListener;
@@ -222,6 +224,15 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
     }
 
     protected void startNodes() {
+        this.nodeMainExecutorService.addListener(new NodeMainExecutorServiceListener() {
+            @Override
+            public void onShutdown(NodeMainExecutorService nodeMainExecutorService) {
+                unbindFromTango();
+                // This ensures to kill the process started by the app.
+                android.os.Process.killProcess(android.os.Process.myPid());
+            }
+        });
+
         mMasterUri = getMasterUri();
         mHostName = getRosHostname();
 
@@ -664,6 +675,14 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
         intent.setAction(REQUEST_TANGO_PERMISSION_ACTION);
         intent.putExtra(EXTRA_KEY_PERMISSIONTYPE, permissionType);
         startActivityForResult(intent, requestCode);
+    }
+
+    private void unbindFromTango() {
+        if (TangoInitializationHelper.isTangoServiceBound()) {
+            mLog.info("Unbind tango service");
+            TangoInitializationHelper.unbindTangoService(this, mTangoServiceConnection);
+            mTangoStatusIndicator.updateStatus(ModuleStatusIndicator.Status.ERROR);
+        }
     }
 
     private void addRuntimeParameters() {
