@@ -679,6 +679,12 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
         }
     }
 
+    /**
+     * Triggers intents to get Tango permission.
+     * Required in Android N.
+     * @param permissionType Permission type string.
+     * @param requestCode Activity request code.
+     */
     private void getTangoPermission(String permissionType, int requestCode) {
         Intent intent = new Intent();
         intent.setAction(REQUEST_TANGO_PERMISSION_ACTION);
@@ -686,6 +692,9 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
         startActivityForResult(intent, requestCode);
     }
 
+    /**
+     * Unbinds from Tango service.
+     */
     private void unbindFromTango() {
         if (TangoInitializationHelper.isTangoServiceBound()) {
             mLog.info("Unbind tango service");
@@ -694,6 +703,10 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
         }
     }
 
+    /**
+     * Adds resources to be loaded that depend on the device
+     * (they cannot be set at compile time statically).
+     */
     private void addRuntimeParameters() {
         String androidApiLevel = "android_api_level: " + Integer.toString(Build.VERSION.SDK_INT);
         mLog.info("Adding android API level parameter: " + androidApiLevel);
@@ -701,6 +714,13 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
                 new ByteArrayInputStream(androidApiLevel.getBytes()), TANGO_NAMESPACE));
     }
 
+    /**
+     * Handles results from intents (Tango permission requests).
+     * Other types of requests are forwarded to parent class.
+     * @param requestCode Intent request code.
+     * @param resultCode Intent result code.
+     * @param data Intent data.
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         mLog.info("onActivityResult - request code: " + Integer.toString(requestCode) + " result code: " + Integer.toString(resultCode));
