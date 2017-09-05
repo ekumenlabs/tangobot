@@ -16,9 +16,6 @@
 
 package com.ekumen.tangobot.loaders;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
@@ -26,7 +23,7 @@ import android.hardware.usb.UsbManager;
 import com.ekumen.base_controller.BaseControllerNode;
 import com.ekumen.base_controller.BaseOdomPublisher;
 import com.ekumen.base_driver.BaseDevice;
-import com.ekumen.tangobot.nodes.BatteryPublisherNode;
+import com.ekumen.tangobot.nodes.RobotBatteryPublisherNode;
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 
@@ -46,7 +43,7 @@ import java.net.URI;
 public abstract class AbstractBaseNodeLoader extends UsbDeviceNodeLoader {
     private BaseControllerNode mBaseControllerNode;
     private BaseOdomPublisher mBaseOdomPublisher;
-    private BatteryPublisherNode mBatteryPublisherNode;
+    private RobotBatteryPublisherNode mBatteryPublisherNode;
 
     public AbstractBaseNodeLoader(NodeMainExecutor nme, URI rosMasterUri, String rosHostname) {
         super(nme, rosMasterUri, rosHostname);
@@ -55,7 +52,7 @@ public abstract class AbstractBaseNodeLoader extends UsbDeviceNodeLoader {
     protected abstract BaseDevice getBaseDevice(UsbSerialPort port, UsbDeviceConnection connection) throws Exception;
 
     @Override
-    public NodeMain[] startNodes(UsbDevice baseUsbDevice, UsbManager usbManager, Context context) throws Exception {
+    public NodeMain[] startNodes(UsbDevice baseUsbDevice, UsbManager usbManager) throws Exception {
         if(baseUsbDevice == null) {
             throw new Exception("null USB device provided");
         }
@@ -83,9 +80,7 @@ public abstract class AbstractBaseNodeLoader extends UsbDeviceNodeLoader {
         baseControllerNodeConf.setMasterUri(mRosMasterUri);
         mNodeMainExecutor.execute(mBaseControllerNode, baseControllerNodeConf);
 
-        mBatteryPublisherNode = new BatteryPublisherNode(baseDevice,
-                context.getApplicationContext().registerReceiver(null,
-                        new IntentFilter(Intent.ACTION_BATTERY_CHANGED)));
+        mBatteryPublisherNode = new RobotBatteryPublisherNode(baseDevice);
         NodeConfiguration batteryPublisherConf = NodeConfiguration.newPublic(mRosHostname);
         batteryPublisherConf.setNodeName(mBaseControllerNode.getDefaultNodeName());
         batteryPublisherConf.setMasterUri(mRosMasterUri);

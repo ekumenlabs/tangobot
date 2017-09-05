@@ -16,7 +16,6 @@
 
 package com.ekumen.tangobot.loaders;
 
-import android.content.Context;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
@@ -49,7 +48,7 @@ public abstract class UsbDeviceNodeLoader {
         mRosMasterUri = rosMasterUri;
     }
 
-    public abstract NodeMain[] startNodes(UsbDevice device, UsbManager usbManager, Context context) throws Exception;
+    public abstract NodeMain[] startNodes(UsbDevice device, UsbManager usbManager) throws Exception;
 
     /**
      * Internal helper method that returns a single UsbSerialDriver from the android_usb_serial
