@@ -418,7 +418,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
 
                     // Create the node, keeping a reference of created nodes to allow shutting
                     // down properly on application shutdown or when the device is disconnected
-                    NodeMain[] newUsbNodes = loader.startNodes(mUsbDevice, mUsbManager);
+                    NodeMain[] newUsbNodes = loader.startNodes(mUsbDevice, mUsbManager, getApplicationContext());
                     if (newUsbNodes != null) {
                         mUsbNodes.put(mUsbDevice, newUsbNodes);
                         mLog.info(newUsbNodes.length + " nodes started");
