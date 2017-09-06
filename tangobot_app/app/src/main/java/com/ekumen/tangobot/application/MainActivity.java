@@ -43,6 +43,7 @@ import com.ekumen.tangobot.loaders.KobukiNodeLoader;
 import com.ekumen.tangobot.loaders.UsbDeviceNodeLoader;
 import com.ekumen.tangobot.nodes.DefaultMapTfPublisherNode;
 import com.ekumen.tangobot.nodes.DefaultRobotTfPublisherNode;
+import com.ekumen.tangobot.nodes.DeviceBatteryPublisherNode;
 import com.ekumen.tangobot.nodes.EmptyMapGenerator;
 import com.ekumen.tangobot.nodes.ExtrinsicsTfPublisherNode;
 import com.ekumen.tangobot.nodes.MoveBaseNode;
@@ -121,6 +122,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
     private ExtrinsicsTfPublisherNode mRobotExtrinsicsTfPublisherNode;
     private ExtrinsicsTfPublisherNode mMapExtrinsicsTfPublisherNode;
     private OccupancyGridPublisherNode mOccupancyGridPublisherNode;
+    private DeviceBatteryPublisherNode mDeviceBatteryPublisherNode;
 
     // Status
     private ModuleStatusIndicator mRosMasterStatusIndicator;
@@ -243,6 +245,7 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
         configureParameterServer();
 
         startBaseControllerNode();
+        startDeviceBatteryPublisherNode();
 
         startExtrinsicsPublisherNodes();
         startMapServerNode();
@@ -433,6 +436,15 @@ public class MainActivity extends AppCompatRosActivity implements TangoServiceCl
                 }
             }
         }.start();
+    }
+
+    private void startDeviceBatteryPublisherNode() {
+        mLog.info("Starting device battery publisher");
+        NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(mHostName);
+        nodeConfiguration.setMasterUri(mMasterUri);
+        nodeConfiguration.setNodeName(DeviceBatteryPublisherNode.NODE_NAME);
+        mDeviceBatteryPublisherNode = new DeviceBatteryPublisherNode(getApplicationContext());
+        mNodeMainExecutor.execute(mDeviceBatteryPublisherNode, nodeConfiguration);
     }
 
     @Override

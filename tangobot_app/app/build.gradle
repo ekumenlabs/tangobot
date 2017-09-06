@@ -62,9 +62,10 @@ dependencies {
     compile 'org.ros.rosjava_core:rosjava:[0.3, 0.4)'
     compile 'org.ros.rosjava_core:rosjava_geometry:[0.3, 0.4)'
     compile 'org.ros.rosjava_core:rosjava_helpers:[0.3, 0.4)'
-    compile 'org.ros.rosjava_messages:std_msgs:[0.5,0.6)'
-    compile 'org.ros.rosjava_messages:sensor_msgs:[1.12,1.13)'
-    compile 'org.ros.rosjava_messages:geometry_msgs:[1.12,1.13)'
+    compile 'org.ros.rosjava_messages:std_msgs:[0.5, 0.6)'
+    compile 'org.ros.rosjava_messages:sensor_msgs:[1.12, 1.13)'
+    compile 'org.ros.rosjava_messages:geometry_msgs:[1.12, 1.13)'
+    compile 'org.ros.rosjava_messages:diagnostic_msgs:1.12, 1.13)'
 
     // External libraries
     compile 'com.hoho.android:usb-serial-for-android:[0.2, 0.3)'
